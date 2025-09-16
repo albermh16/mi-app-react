@@ -217,7 +217,6 @@ function Registro() {
                             </div>
                         </div>
                     </div>
-                    {/* -------- FIN DERECHA -------- */}
                 </div>
             </div>
         </div>

@@ -1,0 +1,133 @@
+/* ---------- Variables ---------- */
+:root{
+  --accent: #ff5a00;   /* naranja de las pestañas activas */
+  --muted:  #d9d9d9;   /* gris de bordes */
+  --text-m: #9e9e9e;   /* gris de placeholder */
+  --ok:     #00b530;   /* verde del botón */
+}
+
+/* ---------- Tarjeta ---------- */
+.card{
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+}
+
+/* ---------- Tabs (Particular / Empresa) ---------- */
+.nav-tabs{
+  border-bottom: 0;
+  gap: 12px;
+}
+
+.nav-tabs .nav-link{
+  border: 2px solid var(--muted);
+  border-radius: 8px;
+  background: #fff;
+  color: #bdbdbd;
+  font-weight: 800;
+  padding: .55rem 1.1rem;
+}
+.nav-tabs .nav-link:hover{
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.nav-tabs .nav-link.active{
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---------- Etiquetas y asteriscos ---------- */
+.form-label{
+  font-weight: 700;
+  color: #222;
+}
+
+/* ---------- Inputs y selects ---------- */
+.form-control,
+.form-select{
+  border: 1px solid #cfcfcf;
+  border-radius: 4px;
+  box-shadow: none;
+}
+.form-control::placeholder{
+  color: var(--text-m);
+}
+.form-control:focus,
+.form-select:focus{
+  border-color: var(--accent);
+  box-shadow: 0 0 0 .2rem rgba(255,90,0,.15);
+}
+
+/* “Código Plan Amigo” con borde punteado */
+.form-control-dashed{
+  border-style: dashed;
+  color: inherit;
+}
+
+/* ---------- Checkboxes ---------- */
+.form-check-input:focus{
+  box-shadow: 0 0 0 .2rem rgba(255,90,0,.15);
+}
+
+/* ---------- Botones ---------- */
+.btn-success{
+  background: var(--ok);
+  border-color: var(--ok);
+  text-transform: uppercase;
+  font-weight: 800;
+  letter-spacing: .5px;
+  padding: .9rem 1rem;
+  border-radius: 6px;
+}
+.btn-success:hover{
+  background: #069c2b;
+  border-color: #069c2b;
+}
+
+/* ---------- Espaciados ---------- */
+.card-body > h5{ margin-bottom: 1rem; }
+
+/* ===== NUEVO: panel izquierdo ===== */
+.registro-page .info-box{
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+}
+.title{ color: var(--accent); font-weight: 700; }
+.link-existing{ color:#1a73e8; text-decoration: underline; font-weight:500; }
+
+.benefits{ list-style:none; padding-left:0; margin:0; }
+.benefits li{ position:relative; padding-left:28px; margin:.5rem 0; }
+.benefits li::before{
+  content:"✔"; color:var(--accent); position:absolute; left:0; top:0; line-height:1.2;
+}
+
+/* ===== NUEVO: caja redes sociales ===== */
+.social-box{
+  background:#f5f5f5; border:1px solid #e5e5e5; border-radius:6px; padding:16px;
+}
+.social-label{ font-weight:700; font-size:.85rem; color:#6c6c6c; margin-bottom:10px; }
+.btn-social{ background:#fff; border:1px solid #e0e0e0; border-radius:6px; padding:.6rem 1rem; font-weight:600; }
+.btn-social .icon{ display:inline-flex; }
+
+/* ===== NUEVO: texto aclaratorio gris ===== */
+.form-text{ color:#b0b0b0; }
+
+
+.btn-primary,
+.btn-success{ background: var(--ok); border-color: var(--ok); }
+.btn-primary:hover,
+.btn-success:hover{ background:#069c2b; border-color:#069c2b; }
+
+/* Centrado del bloque y ancho como la página de referencia */
+.registro-page { padding-left: 12px; padding-right: 12px; }
+.registro-wrap { max-width: 1140px; margin-left: auto; margin-right: auto; }
+/* si tu pantalla es muy grande, sube un poco el ancho */
+@media (min-width: 1400px){
+  .registro-wrap { max-width: 1200px; }
+}
+
+/* Que ambas columnas estiren la misma altura (tarjeta = caja izquierda) */
+@media (min-width: 992px){
+  .registro-page .row.align-items-stretch > [class*="col-"] > * { height: 100%; }
+}
+

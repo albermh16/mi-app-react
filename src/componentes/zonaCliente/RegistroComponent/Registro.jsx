@@ -56,6 +56,19 @@ function Registro() {
 
         }
 
+        //mando datos al servidor de nodejs al servicio API-REST
+        fetch("http://localhost:3000/api/registro",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ nombre, apellidos, email, password, genero }) //<--------Serializamos el objeto literal a texto para incluirlo en la p
+
+            }
+        ).then(respuesta => console.log(`Respuesta del servidor: ${respuesta}`))
+        .catch(error => console.log(`Error en la peticion: ${error}`))
+
     };
 
 

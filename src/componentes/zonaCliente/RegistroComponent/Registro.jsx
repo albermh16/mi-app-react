@@ -1,29 +1,63 @@
-import { tieneArroba, tieneMinimo, tieneMayuscula } from '../../../utils/validaciones';
+import { tieneArroba, tieneMinimo, tieneMayuscula, seleccionar } from '../../../utils/validaciones';
 import { useState } from 'react';
 
 
 function Registro() {
     const [modo, setModo] = useState('particular');
     const [showPassword, setShowPassword] = useState(false);
-    
-    {/* VALIDACION PARTICULAR */}
+
+    {/* VALIDACION PARTICULAR */ }
     const [nombre, setNombre] = useState("");
     const [apellidos, setApellidos] = useState("");
     const [email, setEmail] = useState("");
+    const [genero, setGenero] = useState("");
+    const [password, setPassword] = useState("");
 
-    const emailValidoPar = tieneArroba(email) && tieneMinimo(email);
-    const nombreValidoPar= tieneMinimo(nombre);
+    const emailValidoPar = tieneArroba(email);
+    const nombreValidoPar = tieneMinimo(nombre);
     const apellidoValidoPar = tieneMinimo(apellidos);
+    const generoValidoPar = seleccionar(genero);
+    const pswValidoMayusPar = tieneMayuscula(password);
+    const pswValidoMinPar = tieneMinimo(password);
+    const pswValido = tieneMinimo(password) && tieneMayuscula(password);
 
-    {/* VALIDACION EMPRESA*/}   
+    {/* VALIDACION EMPRESA*/ }
     const [nombreEmp, setNombreEmp] = useState("");
     const [apellidosEmp, setApellidosEmp] = useState("");
     const [emailEmp, setEmailEmp] = useState("");
+    const [passwordEmp, setPasswordEmp] = useState("");
 
-    const emailValidoEmp = tieneArroba(emailEmp) && tieneMinimo(emailEmp);
+    const emailValidoEmp = tieneArroba(emailEmp);
     const nombreValidoEmp = tieneMinimo(nombreEmp);
     const apellidoValidoEmp = tieneMinimo(apellidosEmp);
-    
+    const pswValidoMayusEmp = tieneMayuscula(passwordEmp);
+    const pswValidoMinEmp = tieneMinimo(passwordEmp);
+    const pswValidoEmp = tieneMinimo(passwordEmp) && tieneMayuscula(passwordEmp);
+
+    const handleSubmit = (ev) => {
+        ev.preventDefault();
+
+        if (modo === "particular") {
+
+            console.log("Nombre:", nombre);
+            console.log("Apellidos:", apellidos);
+            console.log("Email:", email);
+            console.log("Password:", password);
+            console.log("Genero:", genero,);
+
+        }
+
+        if (modo === "empresa") {
+
+            console.log("Nombre:", nombreEmp);
+            console.log("Apellidos:", apellidosEmp);
+            console.log("Email:", emailEmp);
+            console.log("Password:", passwordEmp);
+
+        }
+
+    };
+
 
     return (
         <div className="container my-5">
@@ -147,7 +181,7 @@ function Registro() {
                             selecciona la opción EMPRESA.
                         </p>
                         {/* Formulario */}
-                        <form className="needs-validation" noValidate>
+                        <form onSubmit={handleSubmit} className="needs-validation" noValidate>
                             {modo === 'particular' && (
                                 <>
                                     <div className="mb-3">
@@ -160,7 +194,7 @@ function Registro() {
                                             id="nombre"
                                             placeholder="Nombre"
                                             required
-                                            onChange={(ev) => setNombre(ev.target.value)}
+                                            onBlur={(ev) => setNombre(ev.target.value)}
                                         />
                                         {nombre && !nombreValidoPar && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
@@ -179,7 +213,7 @@ function Registro() {
                                             id="apellido"
                                             placeholder="Apellido"
                                             required
-                                            onChange={(ev) => setApellidos(ev.target.value)}
+                                            onBlur={(ev) => setApellidos(ev.target.value)}
                                         />
                                         {apellidos && !apellidoValidoPar && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
@@ -198,10 +232,10 @@ function Registro() {
                                             id="email"
                                             placeholder="Email"
                                             required
-                                            onChange={(ev) => setEmail(ev.target.value)}
+                                            onBlur={(ev) => setEmail(ev.target.value)}
                                         />
                                         {email && !emailValidoPar && (
-                                            <p style={{ color: "red" }}>Debe contener @. Debe tener al menos 4 letras</p>
+                                            <p style={{ color: "red" }}>Debe contener @</p>
                                         )}
                                         {emailValidoPar && (
                                             <p style={{ color: "green" }}>Email valido</p>
@@ -218,6 +252,7 @@ function Registro() {
                                             className="form-select"
                                             defaultValue=""
                                             required
+                                            onChange={(e) => setGenero(e.target.value)}
                                         >
                                             <option value="" disabled>Selecciona un género</option>
                                             <option>Hombre</option>
@@ -225,6 +260,12 @@ function Registro() {
                                             <option>No binario</option>
                                             <option>Prefiero no decirlo</option>
                                         </select>
+                                        {!generoValidoPar && (
+                                            <p style={{ color: "red" }}>Debe seleccionar un género</p>
+                                        )}
+                                        {generoValidoPar && (
+                                            <p style={{ color: "green" }}>Genero valido</p>
+                                        )}
                                         <div className="invalid-feedback">
                                             Selecciona una opción.
                                         </div>
@@ -244,6 +285,7 @@ function Registro() {
                                                 placeholder="Introduce tu contraseña"
                                                 required
                                                 minLength={8}
+                                                onBlur={(e) => setPassword(e.target.value)}
                                             />
                                             <button
                                                 type="button"
@@ -276,6 +318,15 @@ function Registro() {
                                                 )}
                                             </button>
                                         </div>
+                                        {password && !pswValidoMinPar && (
+                                            <p style={{ color: "red" }}>Debe contener minimo 4 caracteres</p>
+                                        )}
+                                        {password && !pswValidoMayusPar && (
+                                            <p style={{ color: "red" }}>Debe contener minimo 1 mayuscula</p>
+                                        )}
+                                        {pswValido && (
+                                            <p style={{ color: "green" }}>Contraseña válida</p>
+                                        )}
                                         <div className="invalid-feedback">
                                             La contraseña debe tener al menos 8 caracteres.
                                         </div>
@@ -355,7 +406,7 @@ function Registro() {
                                             className="form-control"
                                             placeholder="Nombre"
                                             required
-                                            onChange={(ev) => setNombreEmp(ev.target.value)}
+                                            onBlur={(ev) => setNombreEmp(ev.target.value)}
                                         />
                                         {nombreEmp && !nombreValidoEmp && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
@@ -370,7 +421,7 @@ function Registro() {
                                             className="form-control"
                                             placeholder="Apellido"
                                             required
-                                            onChange={(ev) => setApellidosEmp(ev.target.value)}
+                                            onBlur={(ev) => setApellidosEmp(ev.target.value)}
                                         />
                                         {apellidosEmp && !apellidoValidoEmp && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
@@ -386,10 +437,10 @@ function Registro() {
                                             className="form-control"
                                             placeholder="Email"
                                             required
-                                            onChange={(ev) => setEmailEmp(ev.target.value)}
+                                            onBlur={(ev) => setEmailEmp(ev.target.value)}
                                         />
                                         {emailEmp && !emailValidoEmp && (
-                                            <p style={{ color: "red" }}>Debe contener @. Debe tener al menos 4 letras</p>
+                                            <p style={{ color: "red" }}>Debe contener @</p>
                                         )}
                                         {emailValidoEmp && (
                                             <p style={{ color: "green" }}>Email valido</p>
@@ -398,7 +449,56 @@ function Registro() {
 
                                     <div className="mb-3">
                                         <label className="form-label">Introduce tu contraseña *</label>
-                                        <input type="password" className="form-control" placeholder="Introduce tu contraseña" required />
+                                        <div className="input-group">
+                                            <input
+                                                type={showPassword ? "text" : "password"}
+                                                className="form-control"
+                                                id="password"
+                                                placeholder="Introduce tu contraseña"
+                                                required
+                                                minLength={8}
+                                                onBlur={(e) => setPasswordEmp(e.target.value)}
+                                            />
+                                            <button
+                                                type="button"
+                                                className="input-group-text bg-white border-start-0"
+                                                onClick={() => setShowPassword(!showPassword)}
+                                            >
+                                                {showPassword ? (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="16"
+                                                        height="16"
+                                                        fill="currentColor"
+                                                        className="bi bi-eye-slash"
+                                                        viewBox="0 0 16 16"
+                                                    >
+                                                        <path d="M13.359 11.238l2.122 2.122-1.414 1.414-2.122-2.122a8.455 8.455 0 01-5.945 2.112C4.998 14.764 2.63 13.633 1 12.143l1.5-1.5c1.236 1.059 2.851 1.821 4.5 2.021v.002c.376.055.764.085 1.156.085.393 0 .78-.03 1.156-.085v-.003a8.456 8.456 0 005.148-2.471zM3.738 4.523l-2.122-2.122 1.414-1.414 2.122 2.122A8.455 8.455 0 018.5 1.236 8.455 8.455 0 0114.357 3.8l-1.5 1.5a8.456 8.456 0 00-5.148-2.471L8.5 2.828a2.5 2.5 0 00-3.535 0L3.738 4.523zm8.354.976l1.5 1.5a8.455 8.455 0 01.006 4.638l-1.494-1.494a5.471 5.471 0 00-.013-1.65l-1.008-1.008a5.5 5.5 0 00-7.748-.87l-1.502-1.502a8.456 8.456 0 015.148-2.471z" />
+                                                    </svg>
+                                                ) : (
+                                                    <svg
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                        width="16"
+                                                        height="16"
+                                                        fill="currentColor"
+                                                        className="bi bi-eye"
+                                                        viewBox="0 0 16 16"
+                                                    >
+                                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM8 2a6 6 0 00-6 6c0 .582.085 1.145.242 1.682C2.32 9.29 2.59 9.32 2.885 9.32 4.7 9.32 6.36 10.98 6.36 12.8c0 .295-.03.566-.09.836A6 6 0 008 14a6 6 0 006-6 6 6 0 00-6-6z" />
+                                                        <path d="M8 5.5c-1.738 0-3.144 1.406-3.144 3.144s1.406 3.144 3.144 3.144 3.144-1.406 3.144-3.144C11.144 6.906 9.738 5.5 8 5.5z" />
+                                                    </svg>
+                                                )}
+                                            </button>
+                                        </div>
+                                        {passwordEmp && !pswValidoMinEmp && (
+                                            <p style={{ color: "red" }}>Debe contener minimo 4 caracteres</p>
+                                        )}
+                                        {passwordEmp && !pswValidoMayusEmp && (
+                                            <p style={{ color: "red" }}>Debe contener minimo 1 mayuscula</p>
+                                        )}
+                                        {pswValidoEmp && (
+                                            <p style={{ color: "green" }}>Contraseña válida</p>
+                                        )}
                                     </div>
 
                                     <div className="mb-3">

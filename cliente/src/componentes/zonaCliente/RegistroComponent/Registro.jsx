@@ -7,67 +7,76 @@ function Registro() {
     const [showPassword, setShowPassword] = useState(false);
 
     {/* VALIDACION PARTICULAR */ }
-    const [nombre, setNombre] = useState("");
-    const [apellidos, setApellidos] = useState("");
-    const [email, setEmail] = useState("");
-    const [genero, setGenero] = useState("");
-    const [password, setPassword] = useState("");
+    const [formParticular, setFormParticular] = useState({
+        nombre: "",
+        apellidos: "",
+        email: "",
+        genero: "",
+        password: "",
+    });
 
-    const emailValidoPar = tieneArroba(email);
-    const nombreValidoPar = tieneMinimo(nombre);
-    const apellidoValidoPar = tieneMinimo(apellidos);
-    const generoValidoPar = seleccionar(genero);
-    const pswValidoMayusPar = tieneMayuscula(password);
-    const pswValidoMinPar = tieneMinimo(password);
-    const pswValido = tieneMinimo(password) && tieneMayuscula(password);
+    const emailValidoPar = tieneArroba(formParticular.email);
+    const nombreValidoPar = tieneMinimo(formParticular.nombre);
+    const apellidoValidoPar = tieneMinimo(formParticular.apellidos);
+    const generoValidoPar = seleccionar(formParticular.genero);
+    const pswValidoMayusPar = tieneMayuscula(formParticular.password);
+    const pswValidoMinPar = tieneMinimo(formParticular.password);
+    const pswValido = tieneMinimo(formParticular.password) && tieneMayuscula(formParticular.password);
 
     {/* VALIDACION EMPRESA*/ }
-    const [nombreEmp, setNombreEmp] = useState("");
-    const [apellidosEmp, setApellidosEmp] = useState("");
-    const [emailEmp, setEmailEmp] = useState("");
-    const [passwordEmp, setPasswordEmp] = useState("");
+    const [formEmpresa, setFormEmpresa] = useState({
+        nombre: "",
+        apellidos: "",
+        email: "",
+        password: "",
+    });
 
-    const emailValidoEmp = tieneArroba(emailEmp);
-    const nombreValidoEmp = tieneMinimo(nombreEmp);
-    const apellidoValidoEmp = tieneMinimo(apellidosEmp);
-    const pswValidoMayusEmp = tieneMayuscula(passwordEmp);
-    const pswValidoMinEmp = tieneMinimo(passwordEmp);
-    const pswValidoEmp = tieneMinimo(passwordEmp) && tieneMayuscula(passwordEmp);
+    const emailValidoEmp = tieneArroba(formEmpresa.email);
+    const nombreValidoEmp = tieneMinimo(formEmpresa.nombre);
+    const apellidoValidoEmp = tieneMinimo(formEmpresa.apellidos);
+    const pswValidoMayusEmp = tieneMayuscula(formEmpresa.password);
+    const pswValidoMinEmp = tieneMinimo(formEmpresa.password);
+    const pswValidoEmp = tieneMinimo(formEmpresa.password) && tieneMayuscula(formEmpresa.password);
 
-    const handleSubmit = (ev) => {
+    const handleValidate = (ev, tipo) => {
+        const { name, value } = ev.target;
+
+        if (tipo === "particular") {
+            setFormParticular({ ...formParticular, [name]: value });
+        } else {
+            setFormEmpresa({ ...formEmpresa, [name]: value });
+        }
+    };
+
+    const handleSubmit = async (ev) => {
         ev.preventDefault();
 
-        if (modo === "particular") {
+        const datos = modo === "particular" ? formParticular : formEmpresa;
 
-            console.log("Nombre:", nombre);
-            console.log("Apellidos:", apellidos);
-            console.log("Email:", email);
-            console.log("Password:", password);
-            console.log("Genero:", genero,);
-
-        }
-
-        if (modo === "empresa") {
-
-            console.log("Nombre:", nombreEmp);
-            console.log("Apellidos:", apellidosEmp);
-            console.log("Email:", emailEmp);
-            console.log("Password:", passwordEmp);
-
-        }
+        console.log(`Datos del formulario: ${datos}`);
 
         //mando datos al servidor de nodejs al servicio API-REST
-        fetch("http://localhost:3000/api/registro",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ nombre, apellidos, email, password, genero }) //<--------Serializamos el objeto literal a texto para incluirlo en la p
+        try {
 
-            }
-        ).then(respuesta => console.log(`Respuesta del servidor: ${respuesta}`))
-        .catch(error => console.log(`Error en la peticion: ${error}`))
+            const respuesta = await fetch("http://localhost:3000/api/registro",{
+
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(datos), //<--------Serializamos el objeto literal a texto para incluirlo en la p
+
+                });
+
+                // el objeto respuesta
+                console.log(`Estado HTTP: ${respuesta.status}`);
+
+                // si el servidor devuelve JSON, lo parseamos
+                const data = await respuesta.json();
+
+        } catch (error) {
+            console.log(`Error en la peticion: ${error}`)
+        }
 
     };
 
@@ -206,10 +215,11 @@ function Registro() {
                                             className="form-control"
                                             id="nombre"
                                             placeholder="Nombre"
+                                            name='nombre'
                                             required
-                                            onBlur={(ev) => setNombre(ev.target.value)}
+                                            onBlur={(ev) => handleValidate(ev, "particular")}
                                         />
-                                        {nombre && !nombreValidoPar && (
+                                        {formParticular.nombre && !nombreValidoPar && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
                                         )}
                                         {nombreValidoPar && (
@@ -225,10 +235,11 @@ function Registro() {
                                             className="form-control"
                                             id="apellido"
                                             placeholder="Apellido"
+                                            name='apellidos'
                                             required
-                                            onBlur={(ev) => setApellidos(ev.target.value)}
+                                            onBlur={(ev) => handleValidate(ev, "particular")}
                                         />
-                                        {apellidos && !apellidoValidoPar && (
+                                        {formParticular.apellidos && !apellidoValidoPar && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
                                         )}
                                         {apellidoValidoPar && (
@@ -244,10 +255,11 @@ function Registro() {
                                             className="form-control"
                                             id="email"
                                             placeholder="Email"
+                                            name='email'
                                             required
-                                            onBlur={(ev) => setEmail(ev.target.value)}
+                                            onBlur={(ev) => handleValidate(ev, "particular")}
                                         />
-                                        {email && !emailValidoPar && (
+                                        {formParticular.email && !emailValidoPar && (
                                             <p style={{ color: "red" }}>Debe contener @</p>
                                         )}
                                         {emailValidoPar && (
@@ -256,7 +268,8 @@ function Registro() {
                                         <div className="invalid-feedback">
                                             Introduce un email válido.
                                         </div>
-                                    </div><div className="mb-3">
+                                    </div>
+                                    <div className="mb-3">
                                         <label htmlFor="genero" className="form-label">
                                             Género <span className="text-danger">*</span>
                                         </label>
@@ -264,8 +277,9 @@ function Registro() {
                                             id="genero"
                                             className="form-select"
                                             defaultValue=""
+                                            name='genero'
                                             required
-                                            onChange={(e) => setGenero(e.target.value)}
+                                            onChange={(ev) => handleValidate(ev, "particular")}
                                         >
                                             <option value="" disabled>Selecciona un género</option>
                                             <option>Hombre</option>
@@ -296,9 +310,10 @@ function Registro() {
                                                 className="form-control"
                                                 id="password"
                                                 placeholder="Introduce tu contraseña"
+                                                name='password'
                                                 required
                                                 minLength={8}
-                                                onBlur={(e) => setPassword(e.target.value)}
+                                                onBlur={(ev) => handleValidate(ev, "particular")}
                                             />
                                             <button
                                                 type="button"
@@ -331,10 +346,10 @@ function Registro() {
                                                 )}
                                             </button>
                                         </div>
-                                        {password && !pswValidoMinPar && (
+                                        {formParticular.password && !pswValidoMinPar && (
                                             <p style={{ color: "red" }}>Debe contener minimo 4 caracteres</p>
                                         )}
-                                        {password && !pswValidoMayusPar && (
+                                        {formParticular.password && !pswValidoMayusPar && (
                                             <p style={{ color: "red" }}>Debe contener minimo 1 mayuscula</p>
                                         )}
                                         {pswValido && (
@@ -418,10 +433,11 @@ function Registro() {
                                         <input type="text"
                                             className="form-control"
                                             placeholder="Nombre"
+                                            name='nombre'
                                             required
-                                            onBlur={(ev) => setNombreEmp(ev.target.value)}
+                                            onBlur={(ev) => handleValidate(ev, "empresa")}
                                         />
-                                        {nombreEmp && !nombreValidoEmp && (
+                                        {formEmpresa.nombre && !nombreValidoEmp && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
                                         )}
                                         {nombreValidoEmp && (
@@ -433,10 +449,11 @@ function Registro() {
                                         <input type="text"
                                             className="form-control"
                                             placeholder="Apellido"
+                                            name='apellidos'
                                             required
-                                            onBlur={(ev) => setApellidosEmp(ev.target.value)}
+                                            onBlur={(ev) => handleValidate(ev, "empresa")}
                                         />
-                                        {apellidosEmp && !apellidoValidoEmp && (
+                                        {formEmpresa.apellidos && !apellidoValidoEmp && (
                                             <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
                                         )}
                                         {apellidoValidoEmp && (
@@ -449,10 +466,11 @@ function Registro() {
                                         <input type="email"
                                             className="form-control"
                                             placeholder="Email"
+                                            name='email'
                                             required
-                                            onBlur={(ev) => setEmailEmp(ev.target.value)}
+                                            onBlur={(ev) => handleValidate(ev, "empresa")}
                                         />
-                                        {emailEmp && !emailValidoEmp && (
+                                        {formEmpresa.email && !emailValidoEmp && (
                                             <p style={{ color: "red" }}>Debe contener @</p>
                                         )}
                                         {emailValidoEmp && (
@@ -468,9 +486,10 @@ function Registro() {
                                                 className="form-control"
                                                 id="password"
                                                 placeholder="Introduce tu contraseña"
+                                                name='password'
                                                 required
                                                 minLength={8}
-                                                onBlur={(e) => setPasswordEmp(e.target.value)}
+                                                onBlur={(ev) => handleValidate(ev, "empresa")}
                                             />
                                             <button
                                                 type="button"
@@ -503,10 +522,10 @@ function Registro() {
                                                 )}
                                             </button>
                                         </div>
-                                        {passwordEmp && !pswValidoMinEmp && (
+                                        {formEmpresa.password && !pswValidoMinEmp && (
                                             <p style={{ color: "red" }}>Debe contener minimo 4 caracteres</p>
                                         )}
-                                        {passwordEmp && !pswValidoMayusEmp && (
+                                        {formEmpresa.password && !pswValidoMayusEmp && (
                                             <p style={{ color: "red" }}>Debe contener minimo 1 mayuscula</p>
                                         )}
                                         {pswValidoEmp && (

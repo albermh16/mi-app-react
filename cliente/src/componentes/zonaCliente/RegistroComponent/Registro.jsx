@@ -59,7 +59,7 @@ function Registro() {
         //mando datos al servidor de nodejs al servicio API-REST
         try {
 
-            const respuesta = await fetch("http://localhost:3000/api/registro", { //<--- el await recupera la respuesta del servidor CORRECTA! como el .then
+            const respuesta = await fetch("http://localhost:3000/api/Cliente/Registro", { //<--- el await recupera la respuesta del servidor CORRECTA! como el .then
 
                 method: "POST",
                 headers: {

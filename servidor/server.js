@@ -1,27 +1,35 @@
-const express = require("express");
+// modulo de codigo de entrada del proyecto nodejs, configuramos servidor web express
+const configExpress = require("express"); //<------- en variable configExpress se almacena funcion de configurcion servidor web que se exporta en modulo express
 const cors = require("cors");
+const configPipeline = require("./config_server_express/config_pipeline")
 
-const app = express();
+
+
+
+const serverExpress = configExpress();//<----- ejecutamos la funcion de configuracion del servidor web express y almacenamos el resultado en variable
 const PORT = 3000;
+configPipeline(serverExpress);
 
 // Permitir peticiones desde cualquier origen
-app.use(cors());
+//serverExpress.use(cors());
 
 // Middleware para entender JSON en las peticiones
-app.use(express.json());
+//serverExpress.use(express.json());
 
 // Ruta de prueba
-app.get("/", (req, res) => {
+/*
+serverExpress.get("/", (req, res) => {
   res.send("Servidor funcionando");
 });
 
 // Endpoint para registro
-app.post("/api/registro", (req, res) => {
+serverExpress.post("/api/Cliente/Registro", (req, res) => {
   console.log("Datos recibidos:", req.body);
   res.json({ status: "ok", message: "Usuario registrado correctamente" });
 });
+*/
 
 // Arrancar el servidor
-app.listen(PORT, () => {
+serverExpress.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

@@ -1,12 +1,14 @@
 import { tieneArroba, tieneMinimo, tieneMayuscula, seleccionar } from '../../../utils/validaciones';
 import { useState } from 'react';
+import InputBox from '../../compGlobales/InputBoxComponent/inputBox';
+import InputBoxPassword from '../../compGlobales/InputBoxComponent/InputBoxPassword';
 
 
 function Registro() {
     const [modo, setModo] = useState('particular');
     const [showPassword, setShowPassword] = useState(false);
 
-    {/* VALIDACION PARTICULAR */ }
+    // VALIDACION PARTICULAR 
     const [formParticular, setFormParticular] = useState({
         nombre: "",
         apellidos: "",
@@ -23,7 +25,7 @@ function Registro() {
     const pswValidoMinPar = tieneMinimo(formParticular.password);
     const pswValido = tieneMinimo(formParticular.password) && tieneMayuscula(formParticular.password);
 
-    {/* VALIDACION EMPRESA*/ }
+    // VALIDACION EMPRESA
     const [formEmpresa, setFormEmpresa] = useState({
         nombre: "",
         apellidos: "",
@@ -57,21 +59,21 @@ function Registro() {
         //mando datos al servidor de nodejs al servicio API-REST
         try {
 
-            const respuesta = await fetch("http://localhost:3000/api/registro",{ //<--- el await recupera la respuesta del servidor CORRECTA! como el .then
+            const respuesta = await fetch("http://localhost:3000/api/registro", { //<--- el await recupera la respuesta del servidor CORRECTA! como el .then
 
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify(datos), //<--------Serializamos el objeto literal a texto para incluirlo en la peticion
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(datos), //<--------Serializamos el objeto literal a texto para incluirlo en la peticion
 
-                });
+            });
 
-                // el objeto respuesta
-                console.log(`Estado HTTP: ${respuesta.status}`);
+            // el objeto respuesta
+            console.log(`Estado HTTP: ${respuesta.status}`);
 
-                // si el servidor devuelve JSON, lo parseamos
-                const data = await respuesta.json();
+            // si el servidor devuelve JSON, lo parseamos
+            const data = await respuesta.json();
 
         } catch (error) {
             console.log(`Error en la peticion: ${error}`)
@@ -205,174 +207,100 @@ function Registro() {
                         <form onSubmit={handleSubmit} className="needs-validation" noValidate>
                             {modo === 'particular' && (
                                 <>
-                                    <div className="mb-3">
-                                        <label htmlFor="nombre" className="form-label">
-                                            Nombre <span className="text-danger">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="nombre"
-                                            placeholder= "Introduce tu nombre"
-                                            name='nombre'
-                                            required
-                                            onBlur={(ev) => OnChangeHandler(ev, "particular")}
-                                        />
-                                        {formParticular.nombre && !nombreValidoPar && (
-                                            <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
-                                        )}
-                                        {nombreValidoPar && (
-                                            <p style={{ color: "green" }}>Nombre valido</p>
-                                        )}
-                                        <div className="invalid-feedback">Introduce tu nombre.</div>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="apellido" className="form-label">
-                                            Apellido <span className="text-danger">*</span>
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="apellido"
-                                            placeholder="Introduce tu apellido"
-                                            name='apellidos'
-                                            required
-                                            onBlur={(ev) => OnChangeHandler(ev, "particular")}
-                                        />
-                                        {formParticular.apellidos && !apellidoValidoPar && (
-                                            <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
-                                        )}
-                                        {apellidoValidoPar && (
-                                            <p style={{ color: "green" }}>Nombre valido</p>
-                                        )}
-                                        <div className="invalid-feedback">Introduce tus apellidos.</div>
-                                    </div>
-                                    <div className="mb-3">
-                                        <label htmlFor="email" className="form-label">
-                                            Email <span className="text-danger">*</span>
-                                        </label>
-                                        <input
-                                            type="email"
-                                            className="form-control"
-                                            id="email"
-                                            placeholder="Introduce tu email"
-                                            name='email'
-                                            required
-                                            onBlur={(ev) => OnChangeHandler(ev, "particular")}
-                                        />
-                                        {formParticular.email && !emailValidoPar && (
-                                            <p style={{ color: "red" }}>Debe contener @</p>
-                                        )}
-                                        {emailValidoPar && (
-                                            <p style={{ color: "green" }}>Email valido</p>
-                                        )}
-                                        <div className="invalid-feedback">
-                                            Introduce un email válido.
-                                        </div>
-                                    </div>
+                                    <InputBox
+                                        id="nombre"
+                                        label="nombre"
+                                        placeholder="Introduce tu nombre"
+                                        name="nombre"
+                                        type="text"
+                                        required={true}
+                                        tipo="particular"
+                                        value={formParticular.nombre}
+                                        valido={nombreValidoPar}
+                                        errorMsg="Debe tener al menos 4 letras"
+                                        okMsg="Nombre válido"
+                                        OnChangeHandler={OnChangeHandler}
+                                    />
+                                    <InputBox
+                                        id="apellido"
+                                        label="Apellido"
+                                        placeholder="Introduce tu apellido"
+                                        name="apellidos"
+                                        type="text"
+                                        required={true}
+                                        tipo="particular"
+                                        value={formParticular.apellidos}
+                                        valido={apellidoValidoPar}
+                                        errorMsg="Debe tener al menos 4 letras"
+                                        okMsg="Apellido válido"
+                                        OnChangeHandler={OnChangeHandler}
+                                    />
+                                    <InputBox
+                                        id="email"
+                                        label="Email"
+                                        placeholder="Introduce tu email"
+                                        name="email"
+                                        type="text"
+                                        required={true}
+                                        tipo="particular"
+                                        value={formParticular.email}
+                                        valido={emailValidoPar}
+                                        errorMsg="Debe contener @"
+                                        okMsg="Email válido"
+                                        OnChangeHandler={OnChangeHandler}
+                                    />
                                     <div className="mb-3">
                                         <label htmlFor="genero" className="form-label">
                                             Género <span className="text-danger">*</span>
                                         </label>
                                         <select
-                                            id="genero"
                                             className="form-select"
-                                            defaultValue=""
-                                            name='genero'
-                                            required
+                                            id="genero"
+                                            name="genero"
+                                            value={formParticular.genero}
                                             onChange={(ev) => OnChangeHandler(ev, "particular")}
+                                            required
                                         >
-                                            <option value="" disabled>Selecciona un género</option>
-                                            <option>Hombre</option>
-                                            <option>Mujer</option>
-                                            <option>No binario</option>
-                                            <option>Prefiero no decirlo</option>
+                                            <option value="">Selecciona una opción</option>
+                                            <option value="hombre">Hombre</option>
+                                            <option value="mujer">Mujer</option>
+                                            <option value="otro">Otro</option>
                                         </select>
+
                                         {!generoValidoPar && (
-                                            <p style={{ color: "red" }}>Debe seleccionar un género</p>
+                                            <p style={{ color: "red" }}>Debes seleccionar un género</p>
                                         )}
                                         {generoValidoPar && (
-                                            <p style={{ color: "green" }}>Genero valido</p>
+                                            <p style={{ color: "green" }}>Género válido</p>
                                         )}
-                                        <div className="invalid-feedback">
-                                            Selecciona una opción.
-                                        </div>
                                     </div>
-
-
                                     {/* Contraseña con icono de mostrar/ocultar */}
-                                    <div className="mb-3">
-                                        <label htmlFor="password" className="form-label">
-                                            Introduce tu contraseña <span className="text-danger">*</span>
-                                        </label>
-                                        <div className="input-group">
-                                            <input
-                                                type={showPassword ? "text" : "password"}
-                                                className="form-control"
-                                                id="password"
-                                                placeholder="Introduce tu contraseña"
-                                                name='password'
-                                                required
-                                                minLength={8}
-                                                onBlur={(ev) => OnChangeHandler(ev, "particular")}
-                                            />
-                                            <button
-                                                type="button"
-                                                className="input-group-text bg-white border-start-0"
-                                                onClick={() => setShowPassword(!showPassword)}
-                                            >
-                                                {showPassword ? (
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        width="16"
-                                                        height="16"
-                                                        fill="currentColor"
-                                                        className="bi bi-eye-slash"
-                                                        viewBox="0 0 16 16"
-                                                    >
-                                                        <path d="M13.359 11.238l2.122 2.122-1.414 1.414-2.122-2.122a8.455 8.455 0 01-5.945 2.112C4.998 14.764 2.63 13.633 1 12.143l1.5-1.5c1.236 1.059 2.851 1.821 4.5 2.021v.002c.376.055.764.085 1.156.085.393 0 .78-.03 1.156-.085v-.003a8.456 8.456 0 005.148-2.471zM3.738 4.523l-2.122-2.122 1.414-1.414 2.122 2.122A8.455 8.455 0 018.5 1.236 8.455 8.455 0 0114.357 3.8l-1.5 1.5a8.456 8.456 0 00-5.148-2.471L8.5 2.828a2.5 2.5 0 00-3.535 0L3.738 4.523zm8.354.976l1.5 1.5a8.455 8.455 0 01.006 4.638l-1.494-1.494a5.471 5.471 0 00-.013-1.65l-1.008-1.008a5.5 5.5 0 00-7.748-.87l-1.502-1.502a8.456 8.456 0 015.148-2.471z" />
-                                                    </svg>
-                                                ) : (
-                                                    <svg
-                                                        xmlns="http://www.w3.org/2000/svg"
-                                                        width="16"
-                                                        height="16"
-                                                        fill="currentColor"
-                                                        className="bi bi-eye"
-                                                        viewBox="0 0 16 16"
-                                                    >
-                                                        <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM8 2a6 6 0 00-6 6c0 .582.085 1.145.242 1.682C2.32 9.29 2.59 9.32 2.885 9.32 4.7 9.32 6.36 10.98 6.36 12.8c0 .295-.03.566-.09.836A6 6 0 008 14a6 6 0 006-6 6 6 0 00-6-6z" />
-                                                        <path d="M8 5.5c-1.738 0-3.144 1.406-3.144 3.144s1.406 3.144 3.144 3.144 3.144-1.406 3.144-3.144C11.144 6.906 9.738 5.5 8 5.5z" />
-                                                    </svg>
-                                                )}
-                                            </button>
-                                        </div>
-                                        {formParticular.password && !pswValidoMinPar && (
-                                            <p style={{ color: "red" }}>Debe contener minimo 4 caracteres</p>
-                                        )}
-                                        {formParticular.password && !pswValidoMayusPar && (
-                                            <p style={{ color: "red" }}>Debe contener minimo 1 mayuscula</p>
-                                        )}
-                                        {pswValido && (
-                                            <p style={{ color: "green" }}>Contraseña válida</p>
-                                        )}
-                                        <div className="invalid-feedback">
-                                            La contraseña debe tener al menos 8 caracteres.
-                                        </div>
-                                    </div>
+                                    <InputBoxPassword
+                                        id="password"
+                                        label="Introduce tu contraseña"
+                                        placeholder="Introduce tu contraseña"
+                                        name="password"
+                                        tipo="particular"
+                                        value={formParticular.password}
+                                        showPassword={showPassword}
+                                        setShowPassword={setShowPassword}
+                                        validoMin={pswValidoMinPar}
+                                        validoMayus={pswValidoMayusPar}
+                                        valido={pswValido}
+                                        minMsg={"Debe contener almenos 4 caracteres"}
+                                        mayusMsg={"Debe contener almenos 1 mayuscula"}
+                                        okMsg="Password valida"
+                                        OnChangeHandler={OnChangeHandler}
+                                    />
                                     {/* Código Plan Amigo */}
-                                    <div className="mb-3">
-                                        <label htmlFor="planAmigo" className="form-label">
-                                            Código Plan Amigo
-                                        </label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            id="planAmigo"
-                                            placeholder="Código Plan Amigo"
-                                            style={{ borderStyle: "dashed" }}
-                                        />
-                                    </div>
+                                    <InputBox
+                                        id="planAmigo"
+                                        label="Código plan amigo"
+                                        type="text"
+                                        placeholder="Código Plan Amigo"
+                                        extraStyle={{ borderStyle: "dashed" }}
+                                    />
+
                                     {/* Promociones y privacidad */}
                                     <h6 className="fw-bold">Enviar promociones especiales para clientes</h6>
                                     <div className="form-check mb-2">

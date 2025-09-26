@@ -1,25 +1,42 @@
-function InputBox(props) {
+function InputBox({
+    id,
+    label,
+    type = "text",
+    placeholder,
+    name,
+    required = false,
+    tipo,
+    value,
+    valido,
+    errorMsg,
+    okMsg,
+    OnChangeHandler,
+    extraStyle
+ }) {
+
+
     return (
         <div className="mb-3">
-            <label htmlFor="apellido" className="form-label">
-                ... Nombre del campo <span className="text-danger">*</span>
+            <label htmlFor={id} className="form-label">
+                {label} <span className="text-danger">*</span>
             </label>
             <input
-                type="text" //.... aqui tipo campo...
+                type={type} //.... aqui tipo campo...
                 className="form-control"
-                id="... nombre campo"
-                placeholder="" // ... aqui nombre campo... o valor por defecto
-                name='... nombre campo'
-                required //<-- atributos de validacion html5 para el input
-                onBlur={(ev) => OnChangeHandler(ev, "particular")}// <-- aqui la funcion cambia variable state del componente padre
+                id={id}
+                placeholder={placeholder} // ... aqui nombre campo... o valor por defecto
+                name={name}
+                required={required}//<-- atributos de validacion html5 para el input
+                onBlur={(ev) => OnChangeHandler(ev, tipo)}// <-- aqui la funcion cambia variable state del componente padre
+                style={extraStyle}
             />
-            {formParticular.apellidos && !apellidoValidoPar && (
-                <p style={{ color: "red" }}>Debe tener al menos 4 letras</p>
+            {value && !valido && (
+                <p style={{ color: "red" }}>{errorMsg}</p>
             )}
-            {apellidoValidoPar && (
-                <p style={{ color: "green" }}>Nombre valido</p>
+            {valido && (
+                <p style={{ color: "green" }}>{okMsg}</p>
             )}
-            <div className="invalid-feedback">Introduce tus apellidos.</div>
+            <div className="invalid-feedback">{label.toLowerCase}</div>
         </div>
     )
 }

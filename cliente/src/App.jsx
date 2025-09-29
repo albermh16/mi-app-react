@@ -3,7 +3,7 @@ import Login from './componentes/zonaCliente/loginComponent/Login';
 function App() {
   return (
     <div>
-      <Login />
+      <Registro />
     </div>
   )
 }

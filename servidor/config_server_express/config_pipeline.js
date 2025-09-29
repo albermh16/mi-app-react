@@ -1,35 +1,83 @@
-// modulo de codigo de entrada para configurar la PIPELINE del servidor web express
-// exportamos una funcion que recibe como parametro el objeto servidor web express desde el modulo server.js
-// y dentro de la funcion se configuran los middlewares y demas elementos de la pipeline del servidor web express
+//modulo de codigo para condigurar la PEPELINE del servidor web express
+//va a exportar una duncion que recibe como paramentro el objeto servidor wev express desde el modulo server.js
+//y dentro de la funcion se configuran los middlewares y demas elementor de la pipelie del servidor web express
 
 const cookieParser = require("cookie-parser");
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("cors");
 
-module.exports=(serverExpress)=>{
-    // configuramos la pipeline del servidor web express
-    // son una funcion js que recibe tres parametros:
-    //1. request: objeto que representa la peticion http que hace el cliente al servidor si es el primero en la pipeline
-    //              si no representa el objeto req modificado por el middleware anterior
-    //2. response: objeto que representa la respuesta http que el servidor web express va a enviar al cliente
-    //3. next: funcuon que debe invocar para pasar el control al siguiente middleware en la pipeline
+module.exports = (serverExpress) => {
+  //confuguraremos la pepeline del servidor web express, cada modulo middleware se encarde de una tarea concreta
+  //Son un duncion javascripr qeu recibe 3 paramentros:
+  //1. request: objero que se represente la peticion http que hace el client al seridor si es el primero en la pepeline
+  //              si no represnta el objeto requestmodificado por el middleware anterior.
+  //2. response: objeto que representa la respuesta http que el servidor web express va a enviar al cliente.
+  //3. next: funcion qeu se debe invocar para pasar el control al siguiente diddleware en la pipeline
+  /**
+   *
+   *
+   *
+   */
 
-    //para añadir un middleware a la pipeline del servidor express se usa el metodo .use([/ruta] funcion_middlware) del objeto servidor express
-    //--- funciones middleware para todas las rutas o endpoints del servidor, las globales que siempre actuan
+  //1. Procesamiento de cookies
+  console.log(`la variable cookieParser contiene ${cookieParser}`);
+  serverExpress.use(cookieParser());
 
-    //1. procesamiento de cookies, extraer de cabecera http_request la cabecera cookie y meterla en objeto req.cookies
-    serverExpress.use(cookieParser());
-    //2. procesamiento de datos json en el body de la peticion http_request y lo mete en prop.body del objeto request: req
-    serverExpress.use(express.json());
-    //3. procesamiento de datos en la url pasados por GET en la peticion http_request y los mete en prop.query del objeto request: req.query
-    serverExpress.use(express.urlencoded({extended: false}));
-    //4. procesamiento de peticiones desde todos los origenes
-    serverExpress.use(cors());
-    
-    serverExpress.use("/api/Cliente/Login", (req,res,next)=>{
-        console.log("datos mandados en el body por el registro:", req.body)
-        res.status(200).send({codigo:0, mensaje:`datos recibidos ok..`});
-    });
-    
-        
-}
+  //2.
+  console.log(`el valor de la funcion express.json es: ${express.json}`);
+  serverExpress.use(express.json());
+
+  //3.
+  serverExpress.use(express.urlencoded({ extended: false }));
+
+  //4. CORS
+  console.log(`el calor de la funcion cors es: ${cors}`);
+  serverExpress.use(cors());
+
+  serverExpress.use("/api/Cliente/Registro", async (req, res, next) => {
+    try {
+      console.log(
+        `datos mandados en el body por el cliente REACT desde e lcomponente Registro.js: ${JSON.stringify(
+          req.body
+        )}`
+      );
+      await mongoose.connect("mongodb://127.0.0.1:27017/HSN");
+      //Lanzo INSERT usando mongoose como si fuera una query normal ejecutada contra mengodb en la shell...sin usar ESQUEMAS-MODELO
+      let resInsert = await mongoose.connection
+        .collection("clientes")
+        .insertOne({
+          nombre: req.body.nombre,
+          apellidos: req.body.apellidos,
+          genero: req.body.genero,
+          cuenta: {
+            email: req.body.email,
+            password: bcrypt.hashSync(req.body.password, 10), //<---- Haseamos la password
+            cuentaActivada: false,
+            imagenAvatar: "",
+            fechaCreacionCuenta: new Date(),
+          },
+          direccion: [],
+          pedidos: [],
+          listaFavoritos: [],
+          pedidoActual: {},
+          metodosPago: [],
+        });
+
+      console.log(
+        `la operacion de registro de cliente ha ido bien: ${JSON.stringify(
+          resInsert
+        )}`
+      );
+      //--------2ยบ paso, enviar email de activacion de cuenta al cliente
+
+      //--------3ยบ paso, enviar respuesta al cliente REACT
+      res
+        .status(200)
+        .send({ codigo: 0, mensaje: "ok desde el servidor web express" });
+    } catch (error) {
+      console.error("Error en el registro de cliente:", error);
+      res.status(500).send({ codigo: 1, mensaje: "Error en el servidor" });
+    }
+  });
+};

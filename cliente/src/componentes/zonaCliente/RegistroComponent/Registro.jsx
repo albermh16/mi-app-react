@@ -30,7 +30,7 @@ function Registro() {
         nombre: "",
         apellidos: "",
         email: "",
-        password: "",
+        password: "ASDASDAS",
     });
 
     const emailValidoEmp = tieneArroba(formEmpresa.email);

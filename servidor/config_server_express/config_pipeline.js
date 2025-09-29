@@ -26,7 +26,7 @@ module.exports=(serverExpress)=>{
     //4. procesamiento de peticiones desde todos los origenes
     serverExpress.use(cors());
     
-    serverExpress.use("/api/Cliente/Registro", (req,res,next)=>{
+    serverExpress.use("/api/Cliente/Login", (req,res,next)=>{
         console.log("datos mandados en el body por el registro:", req.body)
         res.status(200).send({codigo:0, mensaje:`datos recibidos ok..`});
     });

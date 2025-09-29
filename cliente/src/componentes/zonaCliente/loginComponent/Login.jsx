@@ -3,9 +3,16 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import InputBox from '../../compGlobales/InputBoxComponent/inputBox';
 import InputBoxPassword from '../../compGlobales/InputBoxComponent/InputBoxPassword';
+import  {useNavigate} from 'react-router-dom';
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
+    const [mensaje, setMensaje] = useState("");
+    
+    const navigate = useNavigate();
+    const irRegistro = () => {
+        navigate('/registro');
+    }
 
     const [login, setLogin] = useState({
         email: "",
@@ -21,12 +28,15 @@ function Login() {
     const handleSubmit = async (ev) => {
         ev.preventDefault();
 
-        const datos = login ? login : null;
-
-        console.log(`Datos del formulario: ${datos}`);
+        console.log(`Datos del formulario: ${login}`);
 
         //mando datos al servidor de nodejs al servicio API-REST
         try {
+
+            if (!login.email || !login.password) {
+                setMensaje("Por favor, rellena todos los campos.");
+                return;
+            }
 
             const respuesta = await fetch("http://localhost:3000/api/Cliente/Login", { //<--- el await recupera la respuesta del servidor CORRECTA! como el .then
 
@@ -34,18 +44,28 @@ function Login() {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify(datos), //<--------Serializamos el objeto literal a texto para incluirlo en la peticion
+                body: JSON.stringify(login), //<--------Serializamos el objeto literal a texto para incluirlo en la peticion
 
             });
+
+            if (!respuesta.ok) {
+                throw new Error(`Usuario o contraseña incorrectos`);
+            }
 
             // el objeto respuesta
             console.log(`Estado HTTP: ${respuesta.status}`);
 
             // si el servidor devuelve JSON, lo parseamos
             const data = await respuesta.json();
+            console.log(`Respuesta del servidor: ${data}`);
+
+            if(data.token){
+                localStorage.setItem("token", data.token)};
+            
+            setMensaje("Login correcto");
 
         } catch (error) {
-            console.log(`Error en la peticion: ${error}`)
+            setMensaje(`${error}`)
         }
 
     };
@@ -103,6 +123,8 @@ function Login() {
                             >
                                 INICIAR SESIÓN
                             </button>
+                             {mensaje && <p>{mensaje}</p>}                            
+                                                      
                             {/* Links debajo del botón */}
                             <div className="mt-2 d-flex justify-content-between align-items-center">
                                 <a href="#" className="text-primary small">
@@ -124,6 +146,7 @@ function Login() {
                                     Conexión segura
                                 </span>
                             </div>
+                            
                         </form>
                     </div>
 
@@ -137,7 +160,7 @@ function Login() {
                                 Acumula puntos, obtén descuentos exclusivos, recibe regalos sorpresa...
                                 todas estas ventajas y muchas más con la cuenta HSN
                             </p>
-                            <button className="btn btn-success w-100 mb-4">
+                            <button className="btn btn-success w-100 mb-4" onClick={irRegistro}>
                                 CREAR UNA CUENTA
                             </button>
                             <h6 className="fw-bold text-uppercase mb-2">
@@ -178,6 +201,7 @@ function Login() {
                                     Continuar con Facebook
                                 </span>
                             </button>
+                            
                         </div>
                     </div>
                 </div>

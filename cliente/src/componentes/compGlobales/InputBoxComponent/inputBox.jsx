@@ -36,7 +36,7 @@ function InputBox({
             {valido && (
                 <p style={{ color: "green" }}>{okMsg}</p>
             )}
-            <div className="invalid-feedback">{label.toLowerCase}</div>
+            <div className="invalid-feedback">{label.toLowerCase()}</div>
         </div>
     )
 }

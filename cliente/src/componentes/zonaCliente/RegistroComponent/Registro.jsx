@@ -2,11 +2,19 @@ import { tieneArroba, tieneMinimo, tieneMayuscula, seleccionar } from '../../../
 import { useState } from 'react';
 import InputBox from '../../compGlobales/InputBoxComponent/inputBox';
 import InputBoxPassword from '../../compGlobales/InputBoxComponent/InputBoxPassword';
+import { useNavigate } from 'react-router-dom';
 
 
 function Registro() {
     const [modo, setModo] = useState('particular');
     const [showPassword, setShowPassword] = useState(false);
+
+    const navigate = useNavigate();
+
+    //funcion para redirigir a login
+    const irLogin = () => {
+        navigate('/login');
+    }
 
     // VALIDACION PARTICULAR 
     const [formParticular, setFormParticular] = useState({
@@ -96,7 +104,7 @@ function Registro() {
                         dinero...
                     </p>
                     <p>
-                        <a href="#" className="text-primary text-decoration-underline">
+                        <a href="#" className="text-primary text-decoration-underline" onClick={irLogin}>
                             Uy, si yo ya tengo una cuenta creada.
                         </a>
                     </p>
@@ -209,7 +217,7 @@ function Registro() {
                                 <>
                                     <InputBox
                                         id="nombre"
-                                        label="nombre"
+                                        label="Nombre"
                                         placeholder="Introduce tu nombre"
                                         name="nombre"
                                         type="text"
@@ -265,6 +273,7 @@ function Registro() {
                                             <option value="hombre">Hombre</option>
                                             <option value="mujer">Mujer</option>
                                             <option value="otro">Otro</option>
+                                            
                                         </select>
 
                                         {!generoValidoPar && (
@@ -274,7 +283,7 @@ function Registro() {
                                             <p style={{ color: "green" }}>Género válido</p>
                                         )}
                                     </div>
-                                    {/* Contraseña con icono de mostrar/ocultar */}
+                                    {/* Contraseña con icono de mostrar/ocultar */} 
                                     <InputBoxPassword
                                         id="password"
                                         label="Introduce tu contraseña"
@@ -299,6 +308,8 @@ function Registro() {
                                         type="text"
                                         placeholder="Código Plan Amigo"
                                         extraStyle={{ borderStyle: "dashed" }}
+                                        name="planAmigo"
+                                        OnChangeHandler={OnChangeHandler}
                                     />
 
                                     {/* Promociones y privacidad */}

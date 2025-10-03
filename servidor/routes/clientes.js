@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const jsonwebtoken = require("jsonwebtoken");
+const ObjectId = mongoose.Types.ObjectId;
+
 
 router.post('/Registro', async (req, res, next) => {
     try {
@@ -35,6 +38,68 @@ router.post('/Registro', async (req, res, next) => {
             );
         console.log(`la operacion de registro en teoria ha ido bien, y su resultado es: ${JSON.stringify(resInsert)}`);
         //----- 2º paso envio de email de confirmacion de registro con link para activar cuenta (mailjet)
+        //Para llamar a la api de mailjet necesitamos: 
+        // hacer una peticion http_POST usando FETCH al endopoint de mailjet: https://api.mailjet.com/v3.1/send
+        // tengo que añadir cabeceras a la peticion:
+        // - la cabecera Authorizatopm con autentication basica (Basic Auth) con mi public key y secret key de mailjet
+        //   Authorization: Basic base64(public_key:secret_key)
+        //   la cabecera Content-Type: application/json
+        // - en el body de la peticion un json con un formato determinado por la appi de mailjet
+
+        const tokenActicacionCuenta = jsonwebtoken.sign({ email: req.body.email, idCliente: resInsert._id },//<-- datos que quiero incluir en el token
+            process.env.JWT_SECRET, //<-- clave secreta para firmar el token
+            { expiresIn: '10min' }//<-- tiempo de validez del token
+        );
+
+
+        const bodyFetchMailjet = {
+            "Messages": [
+                {
+                    "From": {
+                        "Email": "albermh16@gmail.com",
+                        "Name": "Administrador portal tienda"
+                    },
+                    "To": [
+                        {
+                            "Email": "passenger1@mailjet.com",
+                            "Name": "passenger 1"
+                        }
+                    ],
+                    "Subject": "Activa tu",
+                    "TextPart": "Dear passenger 1, welcome to Mailjet! May the delivery force be with you!",
+                    "HTMLPart":
+                        `
+                    <div style="text-align: center;">
+                        <img src="https://www.hsnstore.com/skin/frontend/ultimo/default/hreborn/images/logoHSNRediced.svg" alt="Logo HSN" style="width: 150px;"/>
+                    </div>
+                    <div>
+                        <p><h3>Gracias por registrarte en nuestra tienda</h3></p>
+                        <p>Para finalizar el proyecto de registro correctamente, debes ACTIVAR TU CUENTA.</p>
+                        <p>Para ello haz click en el siguient enlace: <a href:"http://localhost:3000/api/Cliente/ActivarCuenta?email=${req.body.email}&idCliente=${resInsert._id}&token=${tokenActicacionCuenta}">Pulsa aqui</a></p>
+                    </div>
+                    `
+                }
+            ]
+        };
+
+        const petRespMailjet = await fetch('https://api.mailjet.com/v3.1/send',
+            {
+                method: 'POST',
+                headers: {
+                    'Authorization': 'Basic ' + Buffer.from(process.env.MAILJET_PUBLIC_KEY + ':' + process.env.MAILJET_SECRET_KEY).toString('base64'),
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(bodyFetchMailjet)
+            }
+        );
+
+        const resFetchMailjet = await petRespMailjet.json();
+        console.log(`respuesta de mailjet : ${JSON.stringify(resFetchMailjet)}`);
+        // a mi solo me interesa de la respuesta la prop.Status de la primera posicion del array Messages
+        // solo he mandado un email en esta peticion y quiero ver si es igual a success
+        if (datosRespMailjet.Messages[0].Status !== 'success') {
+            throw new Error('no se ha podido enviar email de activacion de cuenta');
+        }
 
         //----- 3º paso envio respuesta al cliente:
         res.status(200).send({ codigo: 0, mensaje: 'datos recibidos ok..' });
@@ -65,11 +130,16 @@ router.post('/Login', async (req, res, next) => {
         if (!bcrypt.compareSync(req.body.password, resFindEmailCliente.cuenta.password)) throw new Error('password incorrecta');
 
         //----- 3º paso envio respuesta al cliente de q todo ok con SUS DATOS COMPLETOS (pedidos, direcciones, etc)
+        //------4º crear jwt de sesion para el cliente
+        const token = ""
+
+        //------ 5º enviar respuesta al cliente con sus datos y el token
         res.status(200).send(
             {
                 codigo: 0,
                 mensaje: 'Login ok',
-                datosCliente: resFindEmailCliente
+                datosCliente: resFindEmailCliente,
+                accessToken: token
             }
         );
     } catch (error) {
@@ -78,5 +148,51 @@ router.post('/Login', async (req, res, next) => {
     }
 });
 
+router.post('/Activar cuenta', async (req, res, next) => {
+    //1º extraer de la url las variables: email, idCliente, token
+    //2º comprobar que el token es correcto y no ha expirado (usando jsonwebtoken.verify)
+    //3º si todo ok comprobar que el campo email coincide con el campo email del payload del token
+    //4º si todo ok lanzar un updateOne para poner a true el campo cuentaActivada del cliente
+    //5º enviar respuesta al cliente
+    try {
+
+        const { email, idCliente, token } = req.query;
+
+        await mongoose.connect(process.env.URI_MONGODB);
+
+        const verifyToken = jsonwebtoken.verify(token, process.env.JWT_SECRET);
+
+        if(verfyToken){
+
+            if(verifyToken.email !== email) throw new Error('el email del token no coincide con el email de la url');
+
+            const activarCuenta = await mongoose.connection
+            .collection('clientes')
+            .updateOne(
+                { _id: ObjectId(idCliente), 'cuenta.email': email},
+                { $set: { 'cuenta.cuentaActivada': true } }
+            );
+
+        }else{
+            throw new Error('token no valido o ha expirado');
+        }
+
+        
+
+            
+        
+        if (verifyEmailCliente.modifiedCount === 0) throw new Error('no se ha podido activar la cuenta');
+
+        res.status(200).send({ codigo: 0, mensaje: 'cuenta activada correctamente' });
+        res.status(200).redirect('http://localhost:5173/ActivacionCuentaOk');
+
+
+
+    } catch (error) {
+        res.status(200).send({ codigo: 3, mensaje: `error en activacion de cuenta: ${error}` });
+        res.status(200).redirect('http://localhost:5173/ActivacionCuentaError');
+    }
+
+});
 module.exports = router;
 

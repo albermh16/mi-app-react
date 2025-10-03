@@ -62,7 +62,7 @@ function Registro() {
 
         const datos = modo === "particular" ? formParticular : formEmpresa;
 
-        console.log(`Datos del formulario: ${datos}`);
+        console.log(`Datos del formulario: `, JSON.stringify(datos));
 
         //mando datos al servidor de nodejs al servicio API-REST
         try {

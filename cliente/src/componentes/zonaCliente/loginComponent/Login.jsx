@@ -28,7 +28,7 @@ function Login() {
     const handleSubmit = async (ev) => {
         ev.preventDefault();
 
-        console.log(`Datos del formulario: ${login}`);
+        console.log(`Datos del formulario: ` + JSON.stringify(login));
 
         //mando datos al servidor de nodejs al servicio API-REST
         try {
@@ -57,7 +57,7 @@ function Login() {
 
             // si el servidor devuelve JSON, lo parseamos
             const data = await respuesta.json();
-            console.log(`Respuesta del servidor: ${data}`);
+            console.log(`Respuesta del servidor: ` + data);
 
             if(data.token){
                 localStorage.setItem("token", data.token)};

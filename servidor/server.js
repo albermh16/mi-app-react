@@ -1,6 +1,5 @@
 // modulo de codigo de entrada del proyecto nodejs, configuramos servidor web express
 const configExpress = require("express"); //<------- en variable configExpress se almacena funcion de configurcion servidor web que se exporta en modulo express
-const cors = require("cors");
 const configPipeline = require("./config_server_express/config_pipeline")
 const clienteRouter = require("./routes/clientes.js");
 

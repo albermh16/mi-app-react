@@ -3,84 +3,78 @@ const router = express.Router();
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
-router.post("/Registro", async (req, res, next) => {
+router.post('/Registro', async (req, res, next) => {
     try {
-        console.log(
-            `datos mandados en el body por el cliente REACT desde e lcomponente Registro.js: ${JSON.stringify(
-                req.body
-            )}`
-        );
+        console.log(`datos mandados en el body por cliente REACT desde el componente Registro: ${JSON.stringify(req.body)}`);
+        //-----1º insertar los datos en bd: HSN coleccion clientes (hacer validaciones antes de meter datos!!!!)
+        await mongoose.connect(process.env.URI_MONGODB);
 
-        await mongoose.connect("mongodb+srv://albermh16:Madrid2024@tienda-hsn.kugffbq.mongodb.net/HSN");
-
-        //Lanzo INSERT usando mongoose como si fuera una query normal ejecutada contra mengodb en la shell...sin usar ESQUEMAS-MODELO
+        //lanzo INSERT usando mongoose como si fuera una query normal ejecutada contra mongodb en la shell...sin usar ESQUEMAS-MODELO
         let resInsert = await mongoose.connection
-            .collection("clientes")
-            .insertOne({
-                nombre: req.body.nombre,
-                apellidos: req.body.apellidos,
-                genero: req.body.genero,
-                cuenta: {
-                    email: req.body.email,
-                    password: bcrypt.hashSync(req.body.password, 10), //<---- Haseamos la password
-                    cuentaActivada: false,
-                    imagenAvatar: "",
-                    fechaCreacionCuenta: new Date(),
-                },
-                direccion: [],
-                pedidos: [],
-                listaFavoritos: [],
-                pedidoActual: {},
-                metodosPago: [],
-            });
+            .collection('clientes')
+            .insertOne(
+                {
+                    nombre: req.body.nombre,
+                    apellidos: req.body.apellidos,
+                    genero: req.body.genero,
+                    cuenta: {
+                        email: req.body.email,
+                        password: bcrypt.hashSync(req.body.password, 10),  //<---- almacenamos HASH!!!!
+                        cuentaActivada: false,
+                        iamgenAvatar: '',
+                        fechaCreacionCuenta: Date.now(), //<---- OJO!!! campo fecha siempre en NUMERO MS, nunca string!!!!
+                        telefonoContacto: ''
+                    },
+                    direcciones: [],
+                    pedidos: [],
+                    listaFavoritos: [],
+                    pedidoActual: {},
+                    metodosPago: []
 
-        console.log(
-            `la operacion de registro de cliente ha ido bien: ${JSON.stringify(
-                resInsert
-            )}`
-        );
-        //--------2ยบ paso, enviar email de activacion de cuenta al cliente
+                }
+            );
+        console.log(`la operacion de registro en teoria ha ido bien, y su resultado es: ${JSON.stringify(resInsert)}`);
+        //----- 2º paso envio de email de confirmacion de registro con link para activar cuenta (mailjet)
 
-        //--------3ยบ paso, enviar respuesta al cliente REACT
-        res.status(200).send({ codigo: 0, mensaje: "Registro correcto" });
+        //----- 3º paso envio respuesta al cliente:
+        res.status(200).send({ codigo: 0, mensaje: 'datos recibidos ok..' });
+
     } catch (error) {
-        console.error("Error en el registro de cliente:", error);
-        res.status(500).send({ codigo: 1, mensaje: "Error en el servidor" });
+        console.log(`error en registro de datos del cliente: ${error}`);
+        res.status(200).send({ codigo: 1, mensaje: `error en registro de datos del cliente: ${error}` });
+
+
     }
-});
+}
+)
 
 // LOGIN
 
-router.post("/Login", async (req, res, next) => {
+router.post('/Login', async (req, res, next) => {
     try {
-        console.log(
-            `datos mandados en el body por el cliente REACT desde e lcomponente Login.js: ${JSON.stringify(
-                req.body
-            )}`
+        console.log(`datos mandados en el body por cliente REACT desde el componente Login: ${JSON.stringify(req.body)}`);
+        //----- 1º paso comprobar si el email existe en la bd...lanzando query de mongo sin usar ESQUEMAS-MODELO
+        await mongoose.connect(process.env.URI_MONGODB);
+        let resFindEmailCliente = await mongoose.connection
+            .collection('clientes')
+            .findOne({ 'cuenta.email': req.body.email });
+
+        if (!resFindEmailCliente) throw new Error('email no existe en bd');
+        //----- 2º paso si existe el email, comprobar si el password es correcta (calcular el hash de la password que me pasan
+        //y compararlo con el hash almacenado en la bd para ese email)
+        if (!bcrypt.compareSync(req.body.password, resFindEmailCliente.cuenta.password)) throw new Error('password incorrecta');
+
+        //----- 3º paso envio respuesta al cliente de q todo ok con SUS DATOS COMPLETOS (pedidos, direcciones, etc)
+        res.status(200).send(
+            {
+                codigo: 0,
+                mensaje: 'Login ok',
+                datosCliente: resFindEmailCliente
+            }
         );
-
-        await mongoose.connect("mongodb+srv://albermh16:Madrid2024@tienda-hsn.kugffbq.mongodb.net/HSN");
-
-        const user = await mongoose.connection
-            .collection("clientes")
-            .findOne({ "cuenta.email": req.body.email }); //<---- Buscamos el usuario por email
-
-        if (!user) {
-            // Si no se encuentra el usuario, enviamos un error
-            return res.status(401).send({ codigo: 1, mensaje: "Usuario o contraseña incorrectos" });
-        }
-
-        // Comparamos la contraseña proporcionada con la almacenada en la base de datos
-        const valido = bcrypt.compareSync(req.body.password, user.cuenta.password);
-        if (!valido) {
-            // Si la contraseña no es válida, enviamos un error
-            return res.status(401).send({ codigo: 1, mensaje: "Usuario o contraseña incorrectos" });
-        }
-        // Si todo es correcto, enviamos una respuesta de éxito
-        res.status(200).send({ codigo: 0, mensaje: "Login correcto" });
     } catch (error) {
-        console.error("Error en el login de cliente:", error);
-        res.status(500).send({ codigo: 2, mensaje: "Error en el servidor" });
+        console.log(`error en login de datos del cliente: ${error}`);
+        res.status(200).send({ codigo: 2, mensaje: `error en login: ${error}` });
     }
 });
 

@@ -6,7 +6,7 @@ const express=require('express');
 const mongoose=require('mongoose');
 const bcrypt=require('bcrypt');
 const cors=require('cors');
-const clienteRouter=require('../routes/clientes.js');
+
 
 module.exports=(serverExpress)=>{
     //#region ....como funciona la pipeline de express .... 
@@ -46,6 +46,7 @@ module.exports=(serverExpress)=>{
 
     //#region---funciones middleware especificas para procesar determinadas rutas (PROCESADO DE ENRUTAMIENTO O ROUTING) ----- 
 
-    serverExpress.use("/api/Cliente", clienteRouter); // <---- importamos el objeto Router q exporta el modulo endpointsCliente.js y lo pasamos al metodo .use() del servidor express
+    serverExpress.use("/api/Cliente", '../routes/clientes.js');
+    serverExpress.use("/api/Tienda", '../routes/endpointsTienda.js'); // <---- importamos el objeto Router q exporta el modulo endpointsCliente.js y lo pasamos al metodo .use() del servidor express
     //#endregion
     }

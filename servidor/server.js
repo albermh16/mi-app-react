@@ -1,4 +1,4 @@
-//require('dotenv').config(); //<----- 1º instruccion del modulo principal q lee fichero .env y crea
+require('dotenv').config(); //<----- 1º instruccion del modulo principal q lee fichero .env y crea
 //variables de entorno con contenido sensible...
 
 //modulo de codigo de entrada del proyecto nodejs, configuramos servidor web express

@@ -24,7 +24,7 @@ router.post('/Registro', async (req, res, next) => {
                         email: req.body.email,
                         password: bcrypt.hashSync(req.body.password, 10),  //<---- almacenamos HASH!!!!
                         cuentaActivada: false,
-                        iamgenAvatar: '',
+                        imagenAvatar: '',
                         fechaCreacionCuenta: Date.now(), //<---- OJO!!! campo fecha siempre en NUMERO MS, nunca string!!!!
                         telefonoContacto: ''
                     },
@@ -46,7 +46,7 @@ router.post('/Registro', async (req, res, next) => {
         //   la cabecera Content-Type: application/json
         // - en el body de la peticion un json con un formato determinado por la appi de mailjet
 
-        const tokenActicacionCuenta = jsonwebtoken.sign({ email: req.body.email, idCliente: resInsert._id },//<-- datos que quiero incluir en el token
+        const tokenActivacionCuenta = jsonwebtoken.sign({ email: req.body.email, idCliente: resInsert.insertedId.toString() },//<-- datos que quiero incluir en el token
             process.env.JWT_SECRET, //<-- clave secreta para firmar el token
             { expiresIn: '10min' }//<-- tiempo de validez del token
         );
@@ -61,12 +61,12 @@ router.post('/Registro', async (req, res, next) => {
                     },
                     "To": [
                         {
-                            "Email": "passenger1@mailjet.com",
-                            "Name": "passenger 1"
+                            "Email": req.body.email,
+                            "Name": req.body.nombre
                         }
                     ],
-                    "Subject": "Activa tu",
-                    "TextPart": "Dear passenger 1, welcome to Mailjet! May the delivery force be with you!",
+                    "Subject": "Activa tu cuenta",
+                    "TextPart": `Dear ${req.body.nombre}, welcome to Mailjet! May the delivery force be with you!`,
                     "HTMLPart":
                         `
                     <div style="text-align: center;">
@@ -75,7 +75,7 @@ router.post('/Registro', async (req, res, next) => {
                     <div>
                         <p><h3>Gracias por registrarte en nuestra tienda</h3></p>
                         <p>Para finalizar el proyecto de registro correctamente, debes ACTIVAR TU CUENTA.</p>
-                        <p>Para ello haz click en el siguient enlace: <a href:"http://localhost:3000/api/Cliente/ActivarCuenta?email=${req.body.email}&idCliente=${resInsert._id}&token=${tokenActicacionCuenta}">Pulsa aqui</a></p>
+                        <p>Para ello haz click en el siguiente enlace: <a href="http://localhost:3000/api/Cliente/ActivarCuenta?email=${req.body.email}&idCliente=${resInsert.insertedId.toString()}&token=${tokenActivacionCuenta}">Pulsa aqui</a></p>
                     </div>
                     `
                 }
@@ -97,7 +97,7 @@ router.post('/Registro', async (req, res, next) => {
         console.log(`respuesta de mailjet : ${JSON.stringify(resFetchMailjet)}`);
         // a mi solo me interesa de la respuesta la prop.Status de la primera posicion del array Messages
         // solo he mandado un email en esta peticion y quiero ver si es igual a success
-        if (datosRespMailjet.Messages[0].Status !== 'success') {
+        if (resFetchMailjet.Messages[0].Status !== 'success') {
             throw new Error('no se ha podido enviar email de activacion de cuenta');
         }
 
@@ -117,6 +117,7 @@ router.post('/Registro', async (req, res, next) => {
 
 router.post('/Login', async (req, res, next) => {
     try {
+        
         console.log(`datos mandados en el body por cliente REACT desde el componente Login: ${JSON.stringify(req.body)}`);
         //----- 1º paso comprobar si el email existe en la bd...lanzando query de mongo sin usar ESQUEMAS-MODELO
         await mongoose.connect(process.env.URI_MONGODB);
@@ -131,7 +132,14 @@ router.post('/Login', async (req, res, next) => {
 
         //----- 3º paso envio respuesta al cliente de q todo ok con SUS DATOS COMPLETOS (pedidos, direcciones, etc)
         //------4º crear jwt de sesion para el cliente
-        const token = ""
+        const tokenSesion = jsonwebtoken.sign(
+            {
+                email: resFindEmailCliente.cuenta.email
+            },
+            process.env.JWT_SECRET,
+            { expiresIn: '2h' } // <---- tiempo de validez del token
+        );
+        console.log(`el token generado es: ${tokenSesion}`);
 
         //------ 5º enviar respuesta al cliente con sus datos y el token
         res.status(200).send(
@@ -139,7 +147,7 @@ router.post('/Login', async (req, res, next) => {
                 codigo: 0,
                 mensaje: 'Login ok',
                 datosCliente: resFindEmailCliente,
-                accessToken: token
+                accessToken: tokenSesion
             }
         );
     } catch (error) {
@@ -148,7 +156,7 @@ router.post('/Login', async (req, res, next) => {
     }
 });
 
-router.post('/Activar cuenta', async (req, res, next) => {
+router.get('/ActivarCuenta', async (req, res, next) => {
     //1º extraer de la url las variables: email, idCliente, token
     //2º comprobar que el token es correcto y no ha expirado (usando jsonwebtoken.verify)
     //3º si todo ok comprobar que el campo email coincide con el campo email del payload del token
@@ -162,14 +170,16 @@ router.post('/Activar cuenta', async (req, res, next) => {
 
         const verifyToken = jsonwebtoken.verify(token, process.env.JWT_SECRET);
 
-        if(verfyToken){
+        let activarCuenta;
+
+        if(verifyToken){
 
             if(verifyToken.email !== email) throw new Error('el email del token no coincide con el email de la url');
 
-            const activarCuenta = await mongoose.connection
+            activarCuenta = await mongoose.connection
             .collection('clientes')
             .updateOne(
-                { _id: ObjectId(idCliente), 'cuenta.email': email},
+                { _id: new ObjectId(idCliente), 'cuenta.email': email},
                 { $set: { 'cuenta.cuentaActivada': true } }
             );
 
@@ -177,14 +187,11 @@ router.post('/Activar cuenta', async (req, res, next) => {
             throw new Error('token no valido o ha expirado');
         }
 
+        console.log(`resultado de la activacion de cuenta es: ${JSON.stringify(activarCuenta)}`);
         
-
-            
-        
-        if (verifyEmailCliente.modifiedCount === 0) throw new Error('no se ha podido activar la cuenta');
-
-        res.status(200).send({ codigo: 0, mensaje: 'cuenta activada correctamente' });
-        res.status(200).redirect('http://localhost:5173/ActivacionCuentaOk');
+        if (activarCuenta.modifiedCount === 0) throw new Error('no se ha podido activar la cuenta');
+        console.log("cuenta activada correctamente!!!");
+        res.status(200).redirect('http://localhost:5173/activar-cuenta');
 
 
 

@@ -13,7 +13,7 @@ function Registro() {
 
     //funcion para redirigir a login
     const irLogin = () => {
-        navigate('/login');
+        navigate('/Cliente/Login');
     }
 
     // VALIDACION PARTICULAR 

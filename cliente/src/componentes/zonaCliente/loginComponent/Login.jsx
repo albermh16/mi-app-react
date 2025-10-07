@@ -11,7 +11,7 @@ function Login() {
     
     const navigate = useNavigate();
     const irRegistro = () => {
-        navigate('/registro');
+        navigate('/Cliente/Registro');
     }
 
     const [login, setLogin] = useState({

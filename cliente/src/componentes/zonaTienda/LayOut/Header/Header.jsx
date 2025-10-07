@@ -21,14 +21,14 @@ const Header = () => {
   
   useEffect(() => {
     let mounted = true;
-    fetch('http://localhost:3000/api/Tienda/Categorias?pathCat=raices')
+    fetch('http://localhost:3000/api/Tienda/Categorias?pathCat=principales')
       .then((res) => {
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
         return res.json();
       })
       .then((datosBody) => {
         if (!mounted) return;
-        setCategorias(Array.isArray(datosBody.datos) ? datosBody.datos : []);
+        setCategorias(Array.isArray(datosBody.categorias) ? datosBody.categorias : []);
       })
       .catch((err) => {
         if (!mounted) return;

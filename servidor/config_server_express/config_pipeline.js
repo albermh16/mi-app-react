@@ -46,7 +46,7 @@ module.exports=(serverExpress)=>{
 
     //#region---funciones middleware especificas para procesar determinadas rutas (PROCESADO DE ENRUTAMIENTO O ROUTING) ----- 
 
-    serverExpress.use("/api/Cliente", '../routes/clientes.js');
-    serverExpress.use("/api/Tienda", '../routes/endpointsTienda.js'); // <---- importamos el objeto Router q exporta el modulo endpointsCliente.js y lo pasamos al metodo .use() del servidor express
+    serverExpress.use("/api/Cliente", require('../routes/endpointsCliente.js'));
+    serverExpress.use("/api/Tienda", require('../routes/endpointsTienda.js')); // <---- importamos el objeto Router q exporta el modulo endpointsCliente.js y lo pasamos al metodo .use() del servidor express
     //#endregion
     }

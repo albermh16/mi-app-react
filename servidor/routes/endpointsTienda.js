@@ -3,6 +3,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const objetoRouterTienda = express.Router();
 
+
+
 objetoRouterTienda.get('/Categorias', 
     async (req,res,next)=>{ 
         try {
@@ -44,6 +46,33 @@ objetoRouterTienda.get('/Categorias',
         }
     }
 )
+
+objetoRouterTienda.get("/Productos", async (req, res) => {
+  try {
+    const pathCategoria = req.query.pathCat;
+    if (!pathCategoria) {
+      return res.json({ codigo: -1, msg: "falta pathCat", productos: [] });
+    }
+
+    if (mongoose.connection.readyState !== 1) {
+      await mongoose.connect(process.env.URI_MONGODB);
+    }
+
+    // 🔥 Busca cualquier producto cuyo pathCategoria empiece por el valor recibido
+    const patron = new RegExp(`^${pathCategoria}`);
+    const productos = await mongoose.connection
+      .collection("productos")
+      .find({ pathCategoria: patron })
+      .toArray();
+
+    res.json({ codigo: 0, productos });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ codigo: -2, msg: "error en servidor", productos: [] });
+  }
+  console.log("Recibido pathCat:", req.query.pathCat);
+});
+
 
 
 

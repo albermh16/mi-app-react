@@ -1,51 +1,45 @@
-import { BrowserRouter as Router, Route, Routes, createBrowserRouter, RouterProvider } from 'react-router-dom';
-import Registro from './componentes/zonaCliente/RegistroComponent/Registro';
-import Login from './componentes/zonaCliente/loginComponent/Login';
-import ActivarCuenta from './componentes/zonaCliente/RegistroComponent/ActivarCuenta';
-import Home from './componentes/zonaTienda/Inicio/Home';
-import Layout from './componentes/zonaTienda/LayOut/Layout';
-import ProductosCat from './componentes/zonaTienda/Productos/ProductosCat';
+import './App.css'
+import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import Layout from './componentes/zonaTienda/LayOut/Layout'
+import Login from './componentes/zonaCliente/LoginComponent/Login'
+import Registro from './componentes/zonaCliente/RegistroComponent/Registro.jsx'
+import Home from './componentes/zonaTienda/Inicio/Home.jsx'
+import ProductosCat from './componentes/zonaTienda/productos/ProductosCat.jsx'
+import ActivarCuenta from './componentes/zonaCliente/RegistroComponent/ActivarCuenta.jsx'
+//configuramos el modulo de enrutamiento de react, react-router-dom: se encarga de detectar un cambio en la URL del navegador y
+//mostrar el componente asociado a esa URL. Para hacer esto son dos pasos básicos:
+
+//1 paso): usando metodo createBrowserRouter() creamos un objeto router que contiene las rutas de la aplicación; son objetos ROUTE con 
+//propoiedades especificas como son: path (ruta URL), element (componente a renderizar en esa ruta), children (rutas hijas de la ruta actual),...
+
+//2 paso): usando el componente <RouterProvider> (que se importa de react-router-dom) y pasandole como prop el objeto router creado en el
+// primer paso, para activarlo
 
 const rutasAplicacion = createBrowserRouter(
   [
     {
       element: <Layout />,
       children: [
-        { path: '/', element: <Home/> },
-        { path: '/Cliente',
+        { path: '/', element: <Home /> },
+        {
+          path: 'Cliente',
           children: [
             { path: 'Login', element: <Login /> },
             { path: 'Registro', element: <Registro /> },
-            { path: 'ActivarCuenta', element: <ActivarCuenta />},
-            { path: 'Home', element: <Home /> }
+            { path: 'ActivarCuenta', element: <ActivarCuenta /> }
           ]
         },
-        { 
-          path: 'Productos/:pathCat',
-          element: <ProductosCat/>,
-          loader: async ({ request, params }) => {
-            //funcion LOADER que se ejecuta antes de cargar el componente ProductosCat, para cargar los productos de la categoria SELECCIONADA
-            console.log(`ejecutando el loader antes de la carga de ProductosCat, variables request: ${JSON.stringify(request)}, params: ${JSON.stringify(params)}`);
-            /*let pathCat = params.pathCat;
-            let petProductos = await fetch(`http://localhost:3000/api/Tienda/Productos?categoria=${pathCat}`);
-            let bodyRespuesta = await petProductos.json();
-
-            */
-          }
+        {
+          path: 'Productos/:pathCategoria',
+          element: <ProductosCat />,
+          
         },
-        
+        { path: '*', element: <div><img src="/images/error404.png" alt="404 Not Found" /></div> }
       ],
-      loader: async ( {request, params}) => {
-        console.log(`ejecutando el loader antes de la carga del layout, variables request: ${request}, params: ${params}`);
-        let petCategorias = await fetch(`http://localhost:3000/api/Tienda/Categorias?pathCat=principales`);
-        let bodyRespuesta = await petCategorias.json();
-        return bodyRespuesta.categorias;
-
-      }
+      
     },
   ]
 );
-
 
 function App() {
   return (
@@ -55,4 +49,4 @@ function App() {
   )
 }
 
-export default App;
+export default App

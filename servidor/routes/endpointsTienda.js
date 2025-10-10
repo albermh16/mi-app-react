@@ -70,7 +70,7 @@ objetoRouterTienda.get("/Productos", async (req, res) => {
     console.error(err);
     res.status(500).json({ codigo: -2, msg: "error en servidor", productos: [] });
   }
-  console.log("Recibido pathCat:", req.query.pathCat);
+  
 });
 
 

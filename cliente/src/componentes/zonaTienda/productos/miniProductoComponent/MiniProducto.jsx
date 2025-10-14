@@ -1,19 +1,16 @@
 import './MiniProducto.css'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, use } from 'react'
 import { useNavigate } from 'react-router-dom';
+import  useGlobalState  from '../../../../globalState/stateGlobal';
 
 function Miniproducto({ producto }) {
-    const navigate=useNavigate();
-    // const { pedido, setPedido }=useGlobalStore();
+    const navigate=useNavigate(); //<---- hook de react-router-dom para provocar un salto de url por programacion, te devuelve funcion "navigate"
+    
+    //#region ------ State del componente ----------------
+    const {setPedido}=useGlobalState();
+    const [ cantState, setCantState ]=useState(1); //cantidad del producto a comprar ¿¿lo inicializamos a uno siempre?? si existiera el producto en el carrito deberia mostrar la cantidad de producto seleccionada
+    //#endregion
 
-    // const [ cantidad, setCantidad ]=useState( pedido.itemsPedido.find( it => it.producto._id === producto._id)?.cantidad || 0);
-    // useEffect(
-    //     ()=>{
-    //         console.log('actualizando itempedido...', cantidad);
-            
-    //         setPedido('modificaItem',{ producto, cantidad } )
-    //     }, [cantidad, producto, setPedido]
-    // )
 
 
 
@@ -68,15 +65,22 @@ function Miniproducto({ producto }) {
                 </select>
 
                 {/* lista cantidades producto */}
-                <select className="form-select form-select-sm mb-2" aria-label="Default select example">
+                <select className="form-select form-select-sm mb-2" 
+                        aria-label="Default select example" 
+                        onChange={ ev => setCantState( parseInt(ev.target.value) ) } 
+                        value={cantState }>
                 {
                     Array.from({ length: 12 }, (_, i) => i + 1).map( (cantidad, index) => <option key={index} value={cantidad}>{cantidad}</option>)
                 }
                 </select>
 
                 {/* boton añadir al carrito */}
-                <button type="button" className="btn btn-success" style={{ fontSize:'1.4em',backgroundColor: '#00b22d', color: 'white', border:'1px solid #00b22d', boxShadow:'0 5px 0 0 #2c942f', fontWeight:'bold', fontStyle:'italic'}}>
-                    <i class="fa-solid fa-cart-shopping"></i> AÑADIR <i class="fa-solid fa-arrow-right"></i>  {(producto.Precio * producto.Oferta/100).toFixed(2)}€
+                <button onClick={ ()=> setPedido('agregar', { producto, cantidad:cantState } ) }
+                        type="button" 
+                        className="btn btn-success"
+                        style={{ fontSize:'1.4em',backgroundColor: '#00b22d', color: 'white', border:'1px solid #00b22d', boxShadow:'0 5px 0 0 #2c942f', fontWeight:'bold', fontStyle:'italic'}}>
+    
+                        <i class="fa-solid fa-cart-shopping"></i> AÑADIR <i class="fa-solid fa-arrow-right"></i>  {(producto.Precio * producto.Oferta/100).toFixed(2)}€
                 </button>
 
             </div>

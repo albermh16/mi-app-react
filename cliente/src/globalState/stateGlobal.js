@@ -6,34 +6,85 @@
 // para acceder a las variables y funciones definidas en el store
 
 
-import { create } from 'zustand';
+import { create } from 'zustand'
 
-const useGlobalState = create(
-    (set, get, store) => { //<---- el metodo create recibe como parametro una funcion que crea el store global
+const useGloblaState=create( //<---- el metodo create recibe como parametro una funcion q crea el store global
+    ( set,get,store  )=>{
         console.log(`en funcion CREATE para generar el store global, los parametros son:
-             - set: ${set.toString()},
-             - get: ${get.toString()},
-             - store: ${store}`);
-        return {
-            datosCliente: null, // objeto con datos del cliente (si esta logeado)
-            accessToken: null, // token JWT del cliente (si esta logeado)
-            carritoCompra: {
-                itemsProductos: [], // array de objetos de esta forma: { idProducto: ...., cantidad: .....}
-                codigoDescuento: [],
-                fechaPago: null,
-                fechaEnvio: null,
-                estado: "",
-                direccionEnvio: null,
-                direccionFacturacion: null,
-                subTotal: 0,
-                gastosEnvio: 0,
-                totalPagar: 0
+                    - set: ${set.toString()}, 
+                    - get: ${get.toString()}, 
+                    - store: ${store}`);
+        return { //<---------- el return devuelve un objeto con variables(propiedades del objeto) y acciones
+                //             (funciones que cambian el valor de esas propiedades del objeto) del estado global
+            datosCliente: null,// objeto con datos del cliente (si esta logueado)
+            accessToken: null, //token JWT del cliente (si esta logueado)
+            pedido: {
+                itemsProductos:[], //array de objetos de esta forma: { idProducto:..., cantidad: ...}
+                codigoDescuento:[], //codigo de descuento aplicado
+                fechaPago:null, //fecha en q se realizo el pago
+                fechaEnvio:null, //fecha en q se envio el pedido
+                estado:'', //estado del pedido (pagado, enviado, entregado, cancelado),
+                direccionEnvio: null, //direccion de envio del pedido
+                direccionFacturacion: null, //direccion de facturacion del pedido
+                subTotal:0,
+                gastosEnvio:0,
+                totalPagar:0
             },
-            // acciones....
-            setAccessToken: (newAccessToken) => set(state => ({...state, accessToken: newAccessToken})),
+            //acciones....
+            setAccessToken: (newAccessToken)=> set(state => ({ ...state, accessToken: newAccessToken }) ),
+            setPedido: ( accion, itemPedido )=> set( state =>{
+                console.log(`accion en setPedido: ${accion}, itemPedido: ${JSON.stringify(itemPedido)}`);
+                //como vamos a modificar el array de itemsProductos, primero hacemos una copia del array
+                let _items=[...state.pedido.itemsProductos];
+                let _posArray=_items.findIndex( item => item.producto._id === itemPedido.producto._id );
+                
+                switch(accion){
+                    case 'agregar':
+                        console.log(`estamos agregando un producto al pedido: ${JSON.stringify(itemPedido)}`);
+                        //_items.push(itemPedido); //<---- si solo hago esto, el problema esta al añadir el mismo producto varias veces
+                        //hay q comprobar si el producto ya existe en el array, si existe, solo actualizo la cantidad: metodo findIndex
+                        if( _posArray >= 0 ){
+                            //el producto ya existe en el array, solo actualizo la cantidad
+                            _items[_posArray].cantidad += itemPedido.cantidad;
+                        }else{
+                            //el producto no existe en el array, lo añado
+                            _items.push(itemPedido);
+                        }
+                        break;
+                
+                    case 'eliminar':
+                        console.log(`estamos eliminando un producto del pedido: ${JSON.stringify(itemPedido)}`);
+                        _items=_items.filter( item => item.producto._id !== itemPedido.producto._id );
+                        break;
+                
+                    case 'modificar':
+                        console.log(`estamos modificando un producto del pedido: ${JSON.stringify(itemPedido)}`);
+                        if( _posArray >= 0 ){
+                            //el producto ya existe en el array, solo actualizo la cantidad
+                            _items[_posArray].cantidad = itemPedido.cantidad;
+                        }
+                        break;
+                }
+                //como modifcamos el array de itemsProductos, tenemos q actualizar el objeto pedido y recalcular subtotal y totalPagar
+                //para calcular el subtotal, tenemos q recorrer el array de itemsProductos y sumar el precio de cada producto por su cantidad
+                let _subtotal=_items.reduce( (acum, item) => acum + (item.producto.Precio * (1 - item.producto.Oferta/100) * item.cantidad), 0);
+                let _totalPagar=_subtotal + state.pedido.gastosEnvio;
+                return { 
+                        ...state, 
+                        pedido: { 
+                                    ...state.pedido, 
+                                    itemsProductos: _items, 
+                                    subTotal:_subtotal, 
+                                    totalPagar:_totalPagar 
+                                }
+                            }
+            })
         }
     }
 );
 
-export default useGlobalState;
+
+export default useGloblaState; 
+
+
 

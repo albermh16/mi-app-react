@@ -1,6 +1,7 @@
+import './Header.css';
 import { useEffect, useState, useRef } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import './Header.css';
+import useGlobalState from '../../../../globalState/stateGlobal';
 
 
 const Header = () => {
@@ -11,6 +12,9 @@ const Header = () => {
   const hideTimer = useRef(null); // timer para ocultar el mega panel
   const [activeParent, setActiveParent] = useState(null); // pathCategoria activa
   const [showPanel, setShowPanel] = useState(false); // mostrar/ocultar mega panel
+
+  const { pedido } = useGlobalState();
+  console.log(`objeto pedido recuperado del global state en el HEADER: ${JSON.stringify(pedido)}`);
   //#endregion
 
   //#region -------------- EFECTOS DEL COMPONENTE ------------------------
@@ -139,9 +143,9 @@ const Header = () => {
           {/* Main navbar */}
           <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom">
             <div className="container">
-              <a className="navbar-brand d-flex align-items-center" href="#">
+              <Link className="navbar-brand d-flex align-items-center" to="/">
                 <img src="https://www.hsnstore.com/skin/frontend/default/hsnreborn/images/logoHSNReduced.svg" alt="HSN" style={{ width: 115, height: 40, marginRight: 8 }} />
-              </a>
+              </Link>
 
               <form className="d-none d-lg-flex flex-grow-1 mx-3">
                 <div className="input-group w-100">
@@ -151,12 +155,13 @@ const Header = () => {
               </form>
 
               <div className="d-flex align-items-center">
-                <a href="#" className="text-muted me-2 position-relative">
+                <Link to="/Pedido" className="text-muted me-2 position-relative">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-cart-fill" viewBox="0 0 16 16">
                     <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 5H14.5a.5.5 0 0 1 .491.592l-1.5 6A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L1.01 1.607 1 1.5H.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
                   </svg>
-                  <span className="badge bg-danger rounded-pill position-absolute hsn-cart-badge">0</span>
-                </a>
+                  {/* ... mostrar cantidad de items en el carrito, NO VALE LA LONGITUD DEL ARRAY!!! pq depende de la cantidad de producto por item ...*/}
+                  <span className="badge bg-danger rounded-pill position-absolute hsn-cart-badge">{pedido.itemsProductos.length}</span>
+                </Link>
               </div>
             </div>
           </nav>

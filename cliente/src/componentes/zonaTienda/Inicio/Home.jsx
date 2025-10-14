@@ -1,9 +1,50 @@
 import './Home.css';
 
 function Home() {
+    //imagenes cargadas a pelo del carousel...lo suyo seria hacer web-scrapping y pillarlas: queryselector: Array.from(document.querySelectorAll('picture.imageItemMainSlider > img')).map( img => img.getAttribute('src'))
+    const imagenesCarousel= [
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_es-Otono-Outlet-10-2025_03.webp",
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_es-06-lunes-hsndays70-10-2025_03.webp",
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_v2-es-BN-Evocreatine_04.webp",
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_es-BN-EvodietVegan_04.webp",
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_es-Banner-sabor-te-chai-25_13.webp",
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_es-Banner-pack-empiezo-hoy_13.webp",
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_es-Otono-Outlet-10-2025_03.webp",
+                            "https://www.hsnstore.com/media/interaktingslider/interaktingslider_es-06-lunes-hsndays70-10-2025_03.webp"
+                            ]
+
     return (
-        <div class="container mt-4">        
+        <div className="container mt-4">
+            { /* carrusel de imagenes...*/}
             <div className='row'>
+                <div className='col'>
+                    <div id="carouselExample" className="carousel slide" data-bs-ride="carousel">
+                        <div className="carousel-indicators">
+                            {
+                                imagenesCarousel.map( (im,pos) => <button type="button" key={pos} data-bs-target="#carouselExample" data-bs-slide-to={pos} class="active" aria-current="true" aria-label={`Slide ${pos}`}></button> )
+                            }
+                        </div>
+                        <div className="carousel-inner">
+                            {
+                                        imagenesCarousel.map( (im,pos)=> 
+                                            <div className={`carousel-item ${pos==0 ? "active" : "" }`}>
+                                                <img src={im} key={pos} className="d-block w-100" alt={`carrousel-${pos}`} style={{  aspectRatio:' auto 4 / 3',width:'1200px', height:'600px'}}/>
+                                            </div>
+                                )
+                            }
+                            <button className="carousel-control-prev" type="button" data-bs-target="#carouselExample" data-bs-slide="prev">
+                                <span className="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span className="visually-hidden">Previous</span>
+                            </button>
+                            <button className="carousel-control-next" type="button" data-bs-target="#carouselExample" data-bs-slide="next">
+                                <span className="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span className="visually-hidden">Next</span>
+                            </button>                            
+                        </div>
+                    </div>
+                </div>
+            </div>     
+            <div className='row mt-3'>
                 <div className='col'>
                     <div  style={{margin: "0",  padding: "0", color:'#4e4e4e' }}>
                         <h1>Tienda Online de Nutrición Deportiva, Dietética Natural y Accesorios</h1>

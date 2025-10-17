@@ -62,7 +62,12 @@ const useGlobalState = create( //<---- el metodo create recibe como parametro un
                             console.log(`estamos modificando un producto del pedido: ${JSON.stringify(itemPedido)}`);
                             if( _posArray >= 0 ){
                                 //el producto ya existe en el array, solo actualizo la cantidad
-                                _items[_posArray].cantidad = itemPedido.cantidad;
+                                _items[_posArray] = {
+                                    ..._items[_posArray],
+                                    cantidad: itemPedido.cantidad,
+                                    saborSeleccionado: itemPedido.saborSeleccionado,
+                                    formatoSeleccionado: itemPedido.formatoSeleccionado
+                                };
                             }
                             break;
                     }

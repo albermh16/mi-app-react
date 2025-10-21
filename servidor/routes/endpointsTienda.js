@@ -2,6 +2,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const objetoRouterTienda = express.Router();
+import stripeService from '../services/stripeService.js';
 
 
 
@@ -73,7 +74,35 @@ objetoRouterTienda.get("/Productos", async (req, res) => {
 
 });
 
+objetoRouterTienda.get("/FinalizarCompra", async (req, res) => {
+  try {
+    //.. endpoint para finalizar compra, invocado desde componente React: Finalizar.jsx
+    //en el req.body vienen los datos del cliente y del pedido a procesar
+    const {cliente, pedido} = req.body;
+    console.log(`datos recibidos en endpoint FinalizarCompra:, liente y pedido: ${cliente},${pedido}`);
 
+    switch(pedido.metodoPago.tipo){
+      case "Paypal":
+        // Aqui invocariamos la API de Paypal para procesar el pago usando servicios de Paypal
+        break;
 
+      case "Tarjeta de Credito/Debito":
+        // Aqui invocariamos la API del proveedor de pagos con tarjeta de credito con STRIPE usando stripeService.js
+        // Antes de crear el objeto Customer de Stripe y Card asociado al mismo comprobamos si en la BBDD ya existen estos datos para el cliente
+        break;
+
+      case "Bizum":
+        // Aqui invocariamos la API del proveedor de pagos con Bizum
+        break;
+
+      default:
+        break;
+       
+    }
+  } catch (error) {
+    console.error(`Error al finalizar compra: ${error}`);
+    res.status(500).send({ codigo: -1, msg: "Error al finalizar compra" });
+  }
+});
 
 module.exports = objetoRouterTienda;

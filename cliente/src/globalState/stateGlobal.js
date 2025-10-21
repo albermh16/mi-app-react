@@ -94,7 +94,3 @@ const useGlobalState = create( //<---- el metodo create recibe como parametro un
 );
 
 export default useGlobalState; 
-
-
-
-

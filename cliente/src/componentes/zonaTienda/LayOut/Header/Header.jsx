@@ -13,7 +13,8 @@ const Header = () => {
   const [activeParent, setActiveParent] = useState(null); // pathCategoria activa
   const [showPanel, setShowPanel] = useState(false); // mostrar/ocultar mega panel
 
-  const { pedido } = useGlobalState();
+  //#region -------------- GLOBAL STATE DEL CLIENTE -----------------
+  const {pedido, cliente}=useGlobalState();
   console.log(`objeto pedido recuperado del global state en el HEADER: ${JSON.stringify(pedido)}`);
   //#endregion
 
@@ -128,15 +129,36 @@ const Header = () => {
     <div className='container'>
 
       <div className='row'>
-        <div className='col d-flex flex-row justify-content-between' style={{ color: '#999', borderBottom: '1px solid #f1f1f1', fontWeight: '400', fontFamily: '"Roboto","Open Sans",sans-serif' }}>
+        <div className='col d-flex flex-row justify-content-between' style={{ color: '#999', borderBottom:'1px solid #f1f1f1', fontWeight:'400', fontFamily:'"Roboto","Open Sans",sans-serif' }}>          
           <div><p>Envio gratuito a partir de 29,99€*</p></div>
-          <div><p style={{ textAlign: 'center' }}><a href="https://www.hsnstore.com/contacts" style={{ textDecoration: 'underline', color: 'inherit' }}>Contacta con nosotros aqui</a></p></div>
+          <div><p style={{ textAlign:'center'}}><a href="https://www.hsnstore.com/contacts" style={{ textDecoration:'underline', color:'inherit' }}>Contacta con nosotros aqui</a></p></div>
           <div>
-            <a href="/Cliente/Login" style={{ marginRight: 8 }}>Iniciar sesión</a>
-            <a href="/Cliente/Registro" >Crear Cuenta</a>
+            {
+              cliente ? (
+                <>                
+                  <div className="dropdown">
+                    <button className="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                      <span >Hola, {cliente.nombre} {cliente.apellidos} ({cliente.cuenta.email})</span>
+                    </button>
+                    <ul className="dropdown-menu">
+                      {
+                        ['Mis datos personales', 'Mis Pedidos', 'Mis Tickets', 'Plan Ahorro', 'Libreta de direcciones', 'Guardados para luego', 'Mis favoritos', 'Puntos HSN', 'Plan Amigo', 'SALIR'].map( (item,pos) => 
+                          <li key={pos}><a className="dropdown-item" href={`/Cliente/Panel/${item.replace(/\s+/g, '-').toLowerCase()}`}><span style={{ fontSize: '0.9em' }}>{item}</span></a></li>
+                        )
+                      }
+                    </ul>
+                  </div>                  
+                </>
+              ) : (
+                <>                
+                  <a href="/Cliente/Login" style={{  marginRight:8 }}>Iniciar sesión</a>
+                  <a href="/Cliente/Registro" >Crear Cuenta</a>
+                </>
+              )
+            }
           </div>
         </div>
-      </div>
+      </div> 
 
       <div className='row'>
         <div className='col'>

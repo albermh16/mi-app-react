@@ -4,10 +4,13 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import InputBox from '../../compGlobales/InputBoxComponent/inputBox';
 import InputBoxPassword from '../../compGlobales/InputBoxComponent/InputBoxPassword';
 import  {useNavigate} from 'react-router-dom';
+import useGlobalStore from '../../../globalState/stateGlobal';
+
 
 function Login() {
     const [showPassword, setShowPassword] = useState(false);
     const [mensaje, setMensaje] = useState("");
+    const { setCliente } = useGlobalStore();
     
     const navigate = useNavigate();
     const irRegistro = () => {
@@ -25,50 +28,27 @@ function Login() {
     }
         
 
-    const handleSubmit = async (ev) => {
-        ev.preventDefault();
+    async function HandlerSubmitForm(ev) {
+    try {
+      ev.preventDefault();
+      console.log(`datos del formulario de login: ${JSON.stringify(formularioLogin)}`);
+      let respuesta = await fetch('http://localhost:3000/api/Cliente/Login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formularioLogin)
+      });
+      console.log(`respuesta del servidor al login: ${JSON.stringify(respuesta)}`);
 
-        console.log(`Datos del formulario: ` + JSON.stringify(login));
+      let bodyRespuesta = await respuesta.json();
+      if (bodyRespuesta.codigo !== 0) throw new Error(`No se ha podido iniciar sesión, error: ${bodyRespuesta.mensaje}`);
+      //almacenar en el state global los datos del cliente y token de acceso y redirigir o al panel del usuario o a la pagina de inicio de la tienda..
+      setCliente(bodyRespuesta.datosCliente);
+      navigate('/');
 
-        //mando datos al servidor de nodejs al servicio API-REST
-        try {
-
-            if (!login.email || !login.password) {
-                setMensaje("Por favor, rellena todos los campos.");
-                return;
-            }
-
-            const respuesta = await fetch("http://localhost:3000/api/Cliente/Login", { //<--- el await recupera la respuesta del servidor CORRECTA! como el .then
-
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(login), //<--------Serializamos el objeto literal a texto para incluirlo en la peticion
-
-            });
-
-            if (!respuesta.ok) {
-                throw new Error(`Usuario o contraseña incorrectos`);
-            }
-
-            // el objeto respuesta
-            console.log(`Estado HTTP: ${respuesta.status}`);
-
-            // si el servidor devuelve JSON, lo parseamos
-            const data = await respuesta.json();
-            console.log(`Respuesta del servidor: ` + data);
-
-            if(data.token){
-                localStorage.setItem("token", data.token)};
-            
-            setMensaje("Login correcto");
-
-        } catch (error) {
-            setMensaje(`${error}`)
-        }
-
-    };
+    } catch (error) {
+      console.error(`Error en el proceso de login: ${error.message}`);
+    }
+  }
 
     return (
         <div className="container my-5">
@@ -83,7 +63,7 @@ function Login() {
                             Si ya eres usuario registrado, introduce tu email y la contraseña que
                             utilizaste en el registro
                         </p>
-                        <form className="needs-validation" noValidate onSubmit={handleSubmit}>
+                        <form className="needs-validation" noValidate onSubmit={HandlerSubmitForm}>
                             <InputBox
                                 id="email"
                                 label="Email"

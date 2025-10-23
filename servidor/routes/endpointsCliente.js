@@ -74,7 +74,7 @@ router.post('/Registro', async (req, res, next) => {
                     </div>
                     <div>
                         <p><h3>Gracias por registrarte en nuestra tienda</h3></p>
-                        <p>Para finalizar el proyecto de registro correctamente, debes ACTIVAR TU CUENTA.</p>
+                        <p>Para terminar el registro debes ACTIVAR TU CUENTA.</p>
                         <p>Para ello haz click en el siguiente enlace: <a href="http://localhost:3000/api/Cliente/ActivarCuenta?email=${req.body.email}&idCliente=${resInsert.insertedId.toString()}&token=${tokenActivacionCuenta}">Pulsa aqui</a></p>
                     </div>
                     `
@@ -94,6 +94,7 @@ router.post('/Registro', async (req, res, next) => {
         );
 
         const resFetchMailjet = await petRespMailjet.json();
+        console.log("📨 Resultado crudo de Mailjet:", resFetchMailjet);
         console.log(`respuesta de mailjet : ${JSON.stringify(resFetchMailjet)}`);
         // a mi solo me interesa de la respuesta la prop.Status de la primera posicion del array Messages
         // solo he mandado un email en esta peticion y quiero ver si es igual a success

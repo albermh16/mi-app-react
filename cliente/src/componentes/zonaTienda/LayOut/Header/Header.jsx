@@ -14,7 +14,7 @@ const Header = () => {
   const [showPanel, setShowPanel] = useState(false); // mostrar/ocultar mega panel
 
   //#region -------------- GLOBAL STATE DEL CLIENTE -----------------
-  const {pedido, cliente}=useGlobalState();
+  const { pedido, cliente } = useGlobalState();
   console.log(`objeto pedido recuperado del global state en el HEADER: ${JSON.stringify(pedido)}`);
   //#endregion
 
@@ -129,36 +129,36 @@ const Header = () => {
     <div className='container'>
 
       <div className='row'>
-        <div className='col d-flex flex-row justify-content-between' style={{ color: '#999', borderBottom:'1px solid #f1f1f1', fontWeight:'400', fontFamily:'"Roboto","Open Sans",sans-serif' }}>          
+        <div className='col d-flex flex-row justify-content-between' style={{ color: '#999', borderBottom: '1px solid #f1f1f1', fontWeight: '400', fontFamily: '"Roboto","Open Sans",sans-serif' }}>
           <div><p>Envio gratuito a partir de 29,99€*</p></div>
-          <div><p style={{ textAlign:'center'}}><a href="https://www.hsnstore.com/contacts" style={{ textDecoration:'underline', color:'inherit' }}>Contacta con nosotros aqui</a></p></div>
+          <div><p style={{ textAlign: 'center' }}><a href="https://www.hsnstore.com/contacts" style={{ textDecoration: 'underline', color: 'inherit' }}>Contacta con nosotros aqui</a></p></div>
           <div>
             {
               cliente ? (
-                <>                
+                <>
                   <div className="dropdown">
                     <button className="btn btn-light btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                       <span >Hola, {cliente.nombre} {cliente.apellidos} ({cliente.cuenta.email})</span>
                     </button>
                     <ul className="dropdown-menu">
                       {
-                        ['Mis datos personales', 'Mis Pedidos', 'Mis Tickets', 'Plan Ahorro', 'Libreta de direcciones', 'Guardados para luego', 'Mis favoritos', 'Puntos HSN', 'Plan Amigo', 'SALIR'].map( (item,pos) => 
+                        ['Mis datos personales', 'Mis Pedidos', 'Mis Tickets', 'Plan Ahorro', 'Libreta de direcciones', 'Guardados para luego', 'Mis favoritos', 'Puntos HSN', 'Plan Amigo', 'SALIR'].map((item, pos) =>
                           <li key={pos}><a className="dropdown-item" href={`/Cliente/Panel/${item.replace(/\s+/g, '-').toLowerCase()}`}><span style={{ fontSize: '0.9em' }}>{item}</span></a></li>
                         )
                       }
                     </ul>
-                  </div>                  
+                  </div>
                 </>
               ) : (
-                <>                
-                  <a href="/Cliente/Login" style={{  marginRight:8 }}>Iniciar sesión</a>
+                <>
+                  <a href="/Cliente/Login" style={{ marginRight: 8 }}>Iniciar sesión</a>
                   <a href="/Cliente/Registro" >Crear Cuenta</a>
                 </>
               )
             }
           </div>
         </div>
-      </div> 
+      </div>
 
       <div className='row'>
         <div className='col'>
@@ -177,12 +177,12 @@ const Header = () => {
               </form>
 
               <div className="d-flex align-items-center">
-                <Link to="/Pedido" className="text-muted me-2 position-relative">
+                <Link to="/Pedido/PedidoActual" className="text-muted me-2 position-relative">
                   <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-cart-fill" viewBox="0 0 16 16">
                     <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 5H14.5a.5.5 0 0 1 .491.592l-1.5 6A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L1.01 1.607 1 1.5H.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
                   </svg>
                   {/* ... mostrar cantidad de items en el carrito, NO VALE LA LONGITUD DEL ARRAY!!! pq depende de la cantidad de producto por item ...*/}
-                  <span className="badge bg-danger rounded-pill position-absolute hsn-cart-badge">{pedido.itemsProductos.length}</span>
+                  <span className="badge bg-danger rounded-pill position-absolute hsn-cart-badge">{pedido.itemsPedido.length}</span>
                 </Link>
               </div>
             </div>

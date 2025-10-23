@@ -7,6 +7,7 @@ import Home from './componentes/zonaTienda/Inicio/Home.jsx'
 import ProductosCat from './componentes/zonaTienda/productos/ProductosCat.jsx'
 import ActivarCuenta from './componentes/zonaCliente/RegistroComponent/ActivarCuenta.jsx'
 import PedidoComp from './componentes/zonaTienda/Pedido/PedidoComp.jsx'
+import FinPedido from './componentes/zonaTienda/FinalizarPedido/FinPedidoComp/FinPedido.jsx';
 //configuramos el modulo de enrutamiento de react, react-router-dom: se encarga de detectar un cambio en la URL del navegador y
 //mostrar el componente asociado a esa URL. Para hacer esto son dos pasos básicos:
 
@@ -35,8 +36,13 @@ const rutasAplicacion = createBrowserRouter(
           element: <ProductosCat />,
           
         },
-        { path:'Pedido', element: <PedidoComp />},
-        { path: '*', element: <div><img src="/images/error404.png" alt="404 Not Found" /></div> }
+        { path:'Pedido',  
+          children:[
+            { path:'PedidoActual', element:<PedidoComp /> },
+            { path:'FinalizarPedido', element:<FinPedido /> }
+          ]
+        },
+        { path:'*', element: <div><img src="/images/error404.png" alt="404 Not Found" /></div>}
       ],
       
     },

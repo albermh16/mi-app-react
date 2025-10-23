@@ -1,16 +1,38 @@
 import './Finalizar.css'
 import useGlobalStore from '../../../../globalState/stateGlobal';
+import { useNavigate } from 'react-router-dom';
 
 function Finalizar({setCurrentStage}) {
     const {cliente, pedido}=useGlobalStore();
-
+    const navigate=useNavigate();
 
 
     async function HandlerConfCompra(){
         console.log('click en confirmar compra, pedido y datos cliente a enviar:', pedido, cliente);
         //...aqui llamariamos al endpoint de finalizar compra, enviando el objeto pedido y cliente al servidor para procesar la compra...
         try {
-          
+          const petFinPedido=await fetch('http://localhost:3000/api/Tienda/FinalizarCompra',{
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+               },
+            body: JSON.stringify( { pedido,  cliente } ) 
+              }
+          );
+          const datosResp=await petFinPedido.json();
+          if(datosResp.codigo===0){
+            //compra tramitada correctamente
+            console.log('compra tramitada correctamente, datos recibidos:', datosResp.mensaje);
+            //...redireccionar a  un componente de confirmacion de compra, con los datos del pedido, para consultar tu email donde se adjunta factra...
+            //...limpiar el carrito de la compra...
+            alert('Compra realizada correctamente. En breve recibiras un email con los detalles de tu pedido y la factura.');
+            navigate('/')
+
+
+          } else {
+            //error en tramitacion compra...reintentarlo...mostrar un mensaje al usuario...
+            console.log('error en tramitacion compra, datos recibidos:', datosResp.mensaje);
+          }
         } catch (error) {
           console.log('error al tramitar el pedido:', error);
         }

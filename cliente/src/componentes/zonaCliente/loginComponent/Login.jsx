@@ -3,7 +3,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
 import InputBox from '../../compGlobales/InputBoxComponent/inputBox';
 import InputBoxPassword from '../../compGlobales/InputBoxComponent/InputBoxPassword';
-import  {useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 import useGlobalStore from '../../../globalState/stateGlobal';
 
 
@@ -31,11 +31,11 @@ function Login() {
     async function HandlerSubmitForm(ev) {
     try {
       ev.preventDefault();
-      console.log(`datos del formulario de login: ${JSON.stringify(formularioLogin)}`);
+      console.log(`datos del formulario de login: ${JSON.stringify(login)}`);
       let respuesta = await fetch('http://localhost:3000/api/Cliente/Login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formularioLogin)
+        body: JSON.stringify(login)
       });
       console.log(`respuesta del servidor al login: ${JSON.stringify(respuesta)}`);
 

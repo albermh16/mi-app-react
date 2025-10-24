@@ -2,6 +2,7 @@ import './Header.css';
 import { useEffect, useState, useRef } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import useGlobalState from '../../../../globalState/stateGlobal';
+import * as bootstrap from 'bootstrap';
 
 
 const Header = () => {
@@ -13,7 +14,6 @@ const Header = () => {
   const [activeParent, setActiveParent] = useState(null); // pathCategoria activa
   const [showPanel, setShowPanel] = useState(false); // mostrar/ocultar mega panel
 
-  //#region -------------- GLOBAL STATE DEL CLIENTE -----------------
   const { pedido, cliente } = useGlobalState();
   console.log(`objeto pedido recuperado del global state en el HEADER: ${JSON.stringify(pedido)}`);
   //#endregion

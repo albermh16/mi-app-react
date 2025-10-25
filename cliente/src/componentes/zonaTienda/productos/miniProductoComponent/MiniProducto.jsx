@@ -18,7 +18,7 @@ function Miniproducto({ producto }) {
 
     //#region ------ State del componente ----------------
     const { pedido, setPedido } = useGlobalState();
-    const [cantidad, setCantidad] = useState(pedido.itemsPedido.find(it => it.producto._id === producto._id)?.cantidad || 1);
+    const [cantidad, setCantidad] = useState(pedido?.itemsPedido?.find(it => it.producto._id === producto._id)?.cantidad || 1);
     const [productoState, setProductoState] = useState(
         {
             ...prodItem,

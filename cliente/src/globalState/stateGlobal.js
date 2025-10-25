@@ -53,7 +53,7 @@ const useGlobalState = create(
                             };
                         case 'setMetodoPago':
                             return {
-                                ...state,
+                                ...state,   
                                 pedido: {
                                     ...state.pedido,
                                     metodoPago: itemPedido

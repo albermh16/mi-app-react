@@ -182,7 +182,7 @@ const Header = () => {
                     <path d="M0 1.5A.5.5 0 0 1 .5 1h1a.5.5 0 0 1 .485.379L2.89 5H14.5a.5.5 0 0 1 .491.592l-1.5 6A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L1.01 1.607 1 1.5H.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4z" />
                   </svg>
                   {/* ... mostrar cantidad de items en el carrito, NO VALE LA LONGITUD DEL ARRAY!!! pq depende de la cantidad de producto por item ...*/}
-                  <span className="badge bg-danger rounded-pill position-absolute hsn-cart-badge">{pedido.itemsPedido.length}</span>
+                  <span className="badge bg-danger rounded-pill position-absolute hsn-cart-badge">{pedido?.itemsPedido?.length ?? 0}</span>
                 </Link>
               </div>
             </div>

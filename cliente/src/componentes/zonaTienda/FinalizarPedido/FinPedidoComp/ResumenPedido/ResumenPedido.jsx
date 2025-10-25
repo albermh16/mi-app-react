@@ -11,6 +11,7 @@ function ResumenPedido({pedido}) {
                 <div className='col m-4 d-flex flex-column align-items-center justify-content-center'>
                     <span><strong>Tu pedido llegará aproximadamente entre el</strong></span>
                     <div>
+                        
                         <span style={{ fontWeight:'800', color:'#ff6000'}}>{fechaActual.toLocaleDateString()}</span> <span><strong>y el</strong></span> <span style={{ fontWeight:'800', color:'#ff6000'}}>{fechaA3dias.toLocaleDateString()}</span>
 
                     </div>

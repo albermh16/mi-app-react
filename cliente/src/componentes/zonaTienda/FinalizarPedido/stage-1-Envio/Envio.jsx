@@ -41,6 +41,7 @@ function Envio() {
               )
             }
             <option value='nueva'>Añadir nueva dirección</option>
+            <option value='nuevaFact'>Añadir nueva dirección de facturación</option>
           </select>
         </div>
       </div>

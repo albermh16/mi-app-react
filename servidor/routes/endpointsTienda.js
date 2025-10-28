@@ -82,8 +82,38 @@ objetoRouterTienda.post('/FinalizarCompra', async (req,res,next)=>{
         console.log('datos recibidos en endpoint FinalizarCompra, cliente y pedido:', cliente, pedido);
 
         switch (pedido.metodoPago.tipo) {
-            case 'Paypal':
-                //...aqui invocariamos la API de Paypal para procesar el pago usando servicio paypalService.js...
+            case 'PayPal':
+                //1º paso:aqui invocariamos la API de Paypal para procesar el pago usando servicio paypalService.js...
+                pedido._id=new mongoose.Types.ObjectId();
+                
+                const orderPayload = await paypalService.Stage1_createOrderPayPal( cliente._id, pedido );
+                if(! orderPayload ) throw new Error('No se ha podido crear la orden de pago en PayPal');
+
+                //2º paso: almacenamos en mongodb el id del objeto ORDER de PayPal en el pedido del cliente
+                //en propiedad "pedidos" del cliente metemos objeto pedido en el array con propiedad "metodoPago"
+                //asi: { tipo: 'PayPal'. detalles: { estado:'PENDING', idOrderPayPal: ....}}
+                pedido.metodoPago={ tipo: 'PayPal', detalles: {estado:'PENDING', idOrderPayPal:orderPayload.id } };
+
+                await mongoose.connect(process.env.URL_MONGODB);
+                let pedidosUpdate=await mongoose.connection
+                                                .collection('clientes')
+                                                .updateOne(
+                                                    { 'cuenta.email': cliente.cuenta.email},
+                                                    { $push: { pedidos: pedido }}
+                                                );
+
+
+                //3º paso: mandamos respuesta al cliente REACT con los datos de la orden creada en PayPal con la url a cargar
+                //en popup
+                const urlAprobacion=orderPayload.links.find(link => link.rel === 'approve')?.href;
+                res.status(200).send( 
+                                    {
+                                        codigo: 0, 
+                                        mensaje: 'orden de pago creada ok en PayPal', 
+                                        orderIdPayPal: orderPayload.id,
+                                        urlAprobacionPayPal: urlAprobacion 
+                                   } 
+                                );
                 break;
             
 
@@ -179,6 +209,16 @@ objetoRouterTienda.post('/FinalizarCompra', async (req,res,next)=>{
     } catch (error) {
         console.log('error en endpoint FinalizarCompra: ', error);
         res.status(200).send( { codigo: 9, mensaje: 'error al procesar la compra: ' + error } );
+    }
+})
+
+objetoRouterTienda.get('/PaypalCallback', async (req,res,next)=>{
+    try {
+      
+
+    } catch (error) {
+        console.log('error en endpoint PaypalCallback: ', error);
+        res.status(200).send( { codigo: 9, mensaje: 'error en callback de PayPal: ' + error } );
     }
 })
 

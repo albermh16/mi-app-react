@@ -15,8 +15,9 @@ let cacheTokenPayPal={
 
 async function getPayPalAccessToken(){
     try {               
-        if(cacheTokenPayPal.accessToken == null ||  cacheTokenPayPal.expiryTime > Date.now()){
+        if(cacheTokenPayPal.accessToken == null || (cacheTokenPayPal.accessToken && cacheTokenPayPal.expiryTime > Date.now() ) ) {
             //hay que pedir un nuevo token de acceso
+            console.log('Pidiendo nuevo token de acceso a PayPal');
     
             //... codigo para obtener el token de acceso de PayPal
             const petToken=await fetch('https://api-m.sandbox.paypal.com/v1/oauth2/token',{
@@ -37,13 +38,12 @@ async function getPayPalAccessToken(){
             cacheTokenPayPal.accessToken=data.access_token;
             cacheTokenPayPal.expiryTime=(data.expires_in - 5 * 60) * 1000 + Date.now(); //restamos 5 min para que no caduque justo al usarlo
 
+            return data.access_token;
 
         } else {
             //usamos el token de acceso almacenado en memoria
             return cacheTokenPayPal.accessToken;
         }
-
-
 
     } catch (error) {
         console.error(error);
@@ -52,12 +52,8 @@ async function getPayPalAccessToken(){
 }
 
 module.exports = {
-    Stage1_createOrderPayPal: async (orderData) => {
+    Stage1_createOrderPayPal: async (idCliente, pedido) => {
         try {
-            // Validaciones básicas
-            if (!orderData || !orderData.amount || !orderData.currency) {
-                throw new Error('Faltan datos obligatorios: amount y currency son requeridos');
-            }
 
             // Obtener token de acceso
             const accessToken = await getPayPalAccessToken();
@@ -67,19 +63,29 @@ module.exports = {
                 intent: 'CAPTURE', // Indica que queremos capturar el pago inmediatamente
                 purchase_units: [
                     {
+                        items: pedido.itemsPedido.map( item => {
+                            return {
+                                name: item.producto.Nombre,
+                                unit_amount: { currency_code: 'EUR', value: (item.producto.Precio * (1-item.producto.Oferta/100)).toFixed(2) },
+                                quantity: item.cantidad
+                            }
+                        }),
                         amount: {
-                            currency_code: orderData.currency,
-                            value: orderData.amount
-                        },
-                        description: orderData.description || 'Compra en tienda online'
+                            currency_code: 'EUR',
+                            value: pedido.total.toFixed(2),
+                            //OPCIONAL!!! si quieres desglosar el total en subtotal, impuestos, gastos de envio, etc
+                            breakdown: {
+                                item_total: { currency_code: 'EUR', value: pedido.subtotal.toFixed(2) },
+                                shipping: { currency_code: 'EUR', value: pedido.gastosEnvio.toFixed(2) }
+                                //tax_total: { currency_code: 'EUR', value: '0.00' } //si hay impuestos como el IVA
+                            }
+                            //-------------------------------------------------------------------
+                        }
                     }
                 ],
                 application_context: {
-                    brand_name: orderData.brandName || 'Mi Tienda',
-                    landing_page: 'NO_PREFERENCE', // o 'LOGIN' o 'BILLING'
-                    user_action: 'PAY_NOW', // Botón directo de pagar
-                    return_url: orderData.returnUrl || `${process.env.APP_URL}/payment/success`,
-                    cancel_url: orderData.cancelUrl || `${process.env.APP_URL}/payment/cancel`
+                    return_url: `http://localhost:3000/api/Tienda/PaypalCallback?idCliente=${idCliente}&idPedido=${pedido._id}`,
+                    cancel_url: `http://localhost:3000/api/Tienda/PaypalCallback?idCliente=${idCliente}&idPedido=${pedido._id}&cancel=true`
                 }
             };
 
@@ -104,19 +110,13 @@ module.exports = {
             
             console.log('Orden creada exitosamente:', orderCreated.id);
             
-            // Devolver los datos importantes de la orden
-            return {
-                success: true,
-                orderId: orderCreated.id,
-                status: orderCreated.status,
-                links: orderCreated.links, // Contiene los enlaces de aprobación, capture, etc.
-                approvalUrl: orderCreated.links.find(link => link.rel === 'approve')?.href,
-                fullResponse: orderCreated
-            };
+            // Devolver todo el objeto ORDER creado por paypal
+            return orderCreated
 
         } catch (error) {
             console.error('Error en Stage1_createOrderPayPal:', error);
-            throw new Error(`Error en Stage1_createOrderPayPal: ${error.message}`);
+            //throw new Error(`Error en Stage1_createOrderPayPal: ${error.message}`);
+            return null;
         }
     },
     Stage2_captureOrderPayPal: async (orderId) => {

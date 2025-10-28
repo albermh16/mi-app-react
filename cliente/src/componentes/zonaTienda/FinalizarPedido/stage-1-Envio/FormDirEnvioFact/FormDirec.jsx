@@ -1,10 +1,13 @@
 import './FormDirec.css'
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
+
 
 function FormDirec( { esFacturacion, setCliente, setNuevaDirec } ) { 
     //#region --------------- state del componente ---------------------    
     const [ provincias, setProvincias ]=useState([]);
     const [ municipios, setMunicipios ]=useState([]);
+    const [ provinciasSeleccionadas, setProvinciasSeleccionadas ]=useState('');
+    const [ municipiosSeleccionados, setMunicipiosSeleccionados ]=useState('');
     const [ datosDirec, setDatosDirec ]=useState({
         nombre: '',
         apellidos: '',
@@ -23,6 +26,43 @@ function FormDirec( { esFacturacion, setCliente, setNuevaDirec } ) {
     //#region --------------- efectos del componente  ---------------------
 
     //#endregion
+
+    useEffect( () => {
+        async function fetchProvincias() {
+            try {
+                const response = await fetch(`https://apiv1.geoapi.es/provincias?key=${import.meta.env.VITE_GEOAPI_KEY}&type=JSON`);
+
+                if (!response.ok) throw new Error("Error al cargar provincias");
+
+                const data = await response.json();
+                setProvincias(data.data);
+            } catch (err) {
+                console.error("Error cargando provincias:", err);
+                setProvincias([]);
+            }
+        }
+        fetchProvincias();
+    }, [] );
+
+    useEffect( () => {
+        async function fetchMunicipios() {
+            try {
+                const response = await fetch(`https://apiv1.geoapi.es/municipios?CPRO=${provinciasSeleccionadas}&key=${import.meta.env.VITE_GEOAPI_KEY}&type=JSON`);
+
+                if (!response.ok) throw new Error("Error al cargar municipios");
+
+                const data = await response.json();
+                setMunicipios(data.data);
+            } catch (err) {
+                console.error("Error cargando municipios:", err);
+                setMunicipios([]);
+            }
+        }
+        fetchMunicipios();
+    }, [provinciasSeleccionadas] );
+
+    console.log('🔑 VITE_GEOAPI_KEY:', import.meta.env.VITE_GEOAPI_KEY);
+
 
     function handleInputChange( ev ) {
         const { name, value }=ev.target;
@@ -60,14 +100,38 @@ function FormDirec( { esFacturacion, setCliente, setNuevaDirec } ) {
         <div className='row'>
             <div className='col-6'>
                 <label for="txtProvincia" className="form-label">Provincia</label>
-                <select id="txtProvincia" name="provincia" className="form-select" >
+                <select 
+                    id="txtProvincia" 
+                    name="provincia" 
+                    className="form-select" 
+                    onChange={ev => {
+                        setProvinciasSeleccionadas(ev.target.value); 
+                        handleInputChange(ev);
+                    }}
+                >
                     <option selected>Selecciona una provincia</option>
+                    { provincias.map( (provincia, index) => (
+                        <option key={index} value={provincia.CPRO}>{provincia.PRO}</option>
+                    ) )
+                    }
                 </select>
             </div>
             <div className='col-6'>
                 <label for="txtMunicipio" className="form-label">Municipio</label>
-                <select id="txtMunicipio" name="municipio" className="form-select" >
+                <select 
+                    id="txtMunicipio" 
+                    name="municipio" 
+                    className="form-select" 
+                    onChange={ev => {
+                        handleInputChange(ev);
+                        setMunicipiosSeleccionados(ev.target.value);
+                    }}
+                >
                     <option selected>Selecciona un municipio</option>
+                    { municipios.map( (municipio, index) => (
+                        <option key={index} value={municipio.CMUM}>{municipio.DMUN50}</option>
+                    ) )
+                    }
                 </select>
             </div>
         </div>

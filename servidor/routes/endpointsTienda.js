@@ -94,7 +94,7 @@ objetoRouterTienda.post('/FinalizarCompra', async (req,res,next)=>{
                 //asi: { tipo: 'PayPal'. detalles: { estado:'PENDING', idOrderPayPal: ....}}
                 pedido.metodoPago={ tipo: 'PayPal', detalles: {estado:'PENDING', idOrderPayPal:orderPayload.id } };
 
-                await mongoose.connect(process.env.URL_MONGODB);
+                await mongoose.connect(process.env.URI_MONGODB);
                 let pedidosUpdate=await mongoose.connection
                                                 .collection('clientes')
                                                 .updateOne(
@@ -120,7 +120,7 @@ objetoRouterTienda.post('/FinalizarCompra', async (req,res,next)=>{
             case 'Tarjeta de Credito/Debito':
                 //...aqui invocariamos la API de la pasarela de pago para procesar el pago con tarjeta con STRIPE usando servicio stripeService.js...
                 //antes de crear el objeto Customer de Stripe y Card asociado al mismo comprobamos si en la BD ya existen estos datos para el cliente
-                await mongoose.connect(process.env.URL_MONGODB);
+                await mongoose.connect(process.env.URI_MONGODB);
                 let existePagoConTarjeta=await mongoose.connection
                                                         .collection('clientes')
                                                         .findOne(
@@ -171,7 +171,7 @@ objetoRouterTienda.post('/FinalizarCompra', async (req,res,next)=>{
                 }
 
                 //3º paso: crear el cargo asociado al cliente CUSTOMER y al metodo de pago CARD del 1º y 2º paso
-                pedido._id= new moongoose.Types.ObjectId(); //creamos un nuevo _id para el pedido
+                pedido._id= new mongoose.Types.ObjectId(); //creamos un nuevo _id para el pedido
                 let cargoResult=await stripeService.Stage3_CreateChargeForCustomer(
                                                             customerIdStripe,
                                                             cardIdStripe,
@@ -214,13 +214,103 @@ objetoRouterTienda.post('/FinalizarCompra', async (req,res,next)=>{
 
 objetoRouterTienda.get('/PaypalCallback', async (req,res,next)=>{
     try {
-      
+        //...endpoint para procesar el callback de PayPal una vez el usuario ha aprobado o cancelado el pago en la ventana popup de PayPal...
+        //en la url en el query-string vienen los parametros: idCliente, idPedido de mongodb, de forma opcional: cancel=true,  <--- creados por mi al crear la url de retorno
+        //  token  y PayerID (id del comprador en PayPal) <--- estos los añade paypal al redireccionar a este endpoint
+        console.log(`parametros recibidos en query-string del callback de PayPal: ${JSON.stringify(req.query)}`);
+        const {idCliente, idPedido, token, PayerId, cancel} = req.query;
+        
+        //si existe el parametro cancel=true es que el usuario ha cancelado el pago en PayPal
+        if(cancel && cancel === 'true') throw new Error('El usuario ha cancelado el pago en PayPal');
+
+        //procesamos el pago capturando la orden en PayPal usando servicio paypalService.js, necesito recupear el id de Order de Paypal creado en el 1º paso de finalizar compra
+        //lo tengo q recuperar de la BD en el pedido del cliente en estado PENDING
+        await mongoose.connect(process.env.URL_MONGODB);
+        let PedidoPayPal=await mongoose.connection
+                                        .collection('clientes')
+                                        .findOne(
+                                            { _id: new mongoose.Types.ObjectId(idCliente), 
+                                              pedidos:{$elemMatch:{_id:new mongoose.Types.ObjectId(idPedido), 'metodoPago.tipo':'PayPal','metodoPago.detalles.estado':'PENDING'}}
+                                            },
+                                            { 'pedidos.$': 1, _id:0 } 
+                                            
+                                        );
+        console.log('PedidoPayPal recuperado de BD para capturar orden de PayPal:', PedidoPayPal.pedidos[0])
+        if (!PedidoPayPal || PedidoPayPal.pedidos.length === 0) throw new Error('No se ha podido recuperar el pedido en estado PENDING para capturar la orden de PayPal');
+
+        const idOrderPayPal=PedidoPayPal.pedidos[0].metodoPago.detalles.idOrderPayPal;
+
+        const capturaResult=await paypalService.Stage2_captureOrderPayPal( idOrderPayPal );
+        if(! capturaResult ) throw new Error('No se ha podido capturar la orden de PayPal');
+        //actualizamos el estado del metodo de pago en el pedido del cliente de PENDING a COMPLETED en la bd en propiedad metodoPago.detalles.estado
+
+        if (capturaResult.status !== 'COMPLETED') throw new Error(`La captura de la orden de PayPal no se ha completado correctamente, estado actual: ${capturaResult.status}`);
+        let updateEstadoPagoResult=await mongoose.connection
+                                                .collection('clientes')
+                                                .updateOne(
+                                            { 
+                                              _id: new mongoose.Types.ObjectId(idCliente), 
+                                              pedidos:{$elemMatch:{_id:new mongoose.Types.ObjectId(idPedido), 'metodoPago.tipo':'PayPal','metodoPago.detalles.estado':'PENDING'}}
+                                            },
+                                            {
+                                              $set: {
+                                                'pedidos.$.metodoPago.detalles.estado': 'COMPLETED',
+                                                'pedidos.$.metodoPago.detalles.capturaResult': capturaResult
+                                              }
+                                            }
+                                        );
+        //1º problema: SI DEVUELVO UN JSON el popup como no tiene codigo js para procesarlo me lo muestra tal cual en pantalla
+        //res.status(200).send( { codigo: 0, mensaje: 'callback de PayPal recibido ok...' } );
+        
+        //2º problema: si hago un res.redirect a una pagina de confirmacion de pedido en React, el popup carga esa pagina y tengo dos ventanas abiertas con el portal
+        //¿posible solucion? la ventana padre debe con un timer chequear la url del popup y si detecta q aparece la url de FinPdidoOK en el popup, lo cierra y lo carga el
+        //inconveniente q puede aparecer en un momento la ventana popup con la pagina de confirmacion de pedido y la del padre tambien con esa pagina...no es muy elegante pero funciona
+        //res.status(200).redirect(`http://localhost:5173/Pedido/FinPedidoOK?idCliente=${idCliente}&idPedido=${idPedido}&idOrderPayPal=${idOrderPayPal}`);
+
+        //3º forma mas elegante: es mandar codigo javascript al popup para que se cierre y comunique a la ventana padre donde tiene q ir con los datos del pedido de paypal
+        res.status(200).send(
+            ` <!DOCTYPE html>
+                <html>
+                <body>
+                    <script>
+                        window.opener.postMessage({
+                            idCliente: '${idCliente}',
+                            idPedido: '${idPedido}',
+                            captureOrder: '${JSON.stringify(capturaResult)}'
+                        }, '*');
+                        window.close();
+                    </script>
+                </body>
+                </html>
+            `
+        )
 
     } catch (error) {
         console.log('error en endpoint PaypalCallback: ', error);
-        res.status(200).send( { codigo: 9, mensaje: 'error en callback de PayPal: ' + error } );
+        //res.status(200).send( { codigo: 9, mensaje: 'error en callback de PayPal: ' + error } );
+        //res.status(200).redirect(`http://localhost:5173/Pedido/FinPedidoOK?idCliente=${idCliente}&idPedido=${idPedido}&idOrderPayPal=${idOrderPayPal}&cancel=true`);
+        res.status(200).send(
+            ` <!DOCTYPE html>
+                <html>
+                <body>
+                    <script>
+                        window.opener.postMessage({
+                            idCliente: '${idCliente}',
+                            idPedido: '${idPedido}',
+                            cancel: true
+                        }, '*');
+                        window.close();
+                    </script>
+                </body>
+                </html>
+            `
+        )
+
     }
-})
+});
+
+
+
 
 
 module.exports = objetoRouterTienda;

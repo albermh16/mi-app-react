@@ -150,25 +150,13 @@ module.exports = {
 
             const captureData = await response.json();
             
-            console.log('Orden capturada exitosamente:', captureData.id);
-            
-            // Extraer información relevante de la captura
-            const captureDetails = captureData.purchase_units?.[0]?.payments?.captures?.[0];
-            
-            return {
-                success: true,
-                orderId: captureData.id,
-                status: captureData.status,
-                captureId: captureDetails?.id,
-                amount: captureDetails?.amount,
-                payerEmail: captureData.payer?.email_address,
-                payerName: captureData.payer?.name,
-                fullResponse: captureData
-            };
+            console.log('Orden capturada exitosamente:', captureData);
+            return captureData;
 
         } catch (error) {
             console.error('Error en Stage2_captureOrderPayPal:', error);
-            throw new Error(`Error en Stage2_captureOrderPayPal: ${error.message}`);
+            return null;
+            
         }
     }
 }

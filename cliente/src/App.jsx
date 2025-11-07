@@ -4,10 +4,13 @@ import Layout from './componentes/zonaTienda/LayOut/Layout'
 import Login from './componentes/zonaCliente/loginComponent/Login'
 import Registro from './componentes/zonaCliente/RegistroComponent/Registro.jsx'
 import Home from './componentes/zonaTienda/Inicio/Home.jsx'
-import ProductosCat from './componentes/zonaTienda/productos/ProductosCat.jsx'
+import ProductosCat from './componentes/zonaTienda/Productos/ProductosCat.jsx'
+import MiCuenta from './componentes/zonaCliente/CuentaPanel/MiCuenta.jsx'
+import MisDatos from './componentes/zonaCliente/CuentaPanel/1_MisDatosPersonales/MisDatos.jsx'
 import ActivarCuenta from './componentes/zonaCliente/RegistroComponent/ActivarCuenta.jsx'
 import PedidoComp from './componentes/zonaTienda/Pedido/PedidoComp.jsx'
 import FinPedido from './componentes/zonaTienda/FinalizarPedido/FinPedidoComp/FinPedido.jsx';
+import FinPedidoOk from './componentes/zonaTienda/FinalizarPedido/FinPedidoOKTrasPago/FinPedidoOk.jsx';
 //configuramos el modulo de enrutamiento de react, react-router-dom: se encarga de detectar un cambio en la URL del navegador y
 //mostrar el componente asociado a esa URL. Para hacer esto son dos pasos básicos:
 
@@ -28,7 +31,13 @@ const rutasAplicacion = createBrowserRouter(
           children: [
             { path: 'Login', element: <Login /> },
             { path: 'Registro', element: <Registro /> },
-            { path: 'ActivarCuenta', element: <ActivarCuenta /> }
+            { path: 'ActivarCuenta', element: <ActivarCuenta /> },
+            { path: 'Cuenta', 
+             element: <MiCuenta />,
+              children:[
+                { path: 'misDatosPersonales', element: <MisDatos /> },
+              ] 
+            } 
           ]
         },
         {
@@ -39,7 +48,8 @@ const rutasAplicacion = createBrowserRouter(
         { path:'Pedido',  
           children:[
             { path:'PedidoActual', element:<PedidoComp /> },
-            { path:'FinalizarPedido', element:<FinPedido /> }
+            { path:'FinalizarPedido', element:<FinPedido /> },
+            { path:'FinPedidoOK', element:<FinPedidoOk /> }
           ]
         },
         { path:'*', element: <div><img src="/images/error404.png" alt="404 Not Found" /></div>}

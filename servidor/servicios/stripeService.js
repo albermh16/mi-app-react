@@ -12,7 +12,7 @@
 
 const BASE_URL_STRIPE="https://api.stripe.com/v1";
 
-module.exports = {
+module.exports = { 
     Stage1_CreateCustomer: async (nombre, apellidos, email, datosEnvio)=>{
         try {
             //1º PASO: crear el objeto CUSTOMER en Stripe: https://docs.stripe.com/api/customers/create?lang=curl
@@ -20,8 +20,8 @@ module.exports = {
                 name: `${nombre} ${apellidos}`,
                 email,
                 'address[line1]': datosEnvio.calle,
-                'address[city]': datosEnvio.municipio,
-                'address[state]': datosEnvio.provincia,
+                'address[city]': datosEnvio.municipio.DMUN50,
+                'address[state]': datosEnvio.provincia.PRO,
                 'address[postal_code]': datosEnvio.cp,
                 'address[country]': datosEnvio.pais
             }

@@ -1,4 +1,6 @@
 import { Outlet } from 'react-router-dom';
+//el componente <Outlet> es un componente especial de REACT-ROUTER-DOM que actua como marcador de posicion para incrustar
+//los componentes hijos que el MODULO DE ENRUTAMIENTO detecta en la URL del navegador
 import Header from './Header/Header';
 import Footer from './Footer/Footer';
 

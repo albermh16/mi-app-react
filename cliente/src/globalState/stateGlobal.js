@@ -53,7 +53,7 @@ const useGlobalState = create(
                             };
                         case 'setMetodoPago':
                             return {
-                                ...state,   
+                                ...state,
                                 pedido: {
                                     ...state.pedido,
                                     metodoPago: itemPedido
@@ -93,8 +93,13 @@ const useGlobalState = create(
                             }
                             //como modifcamos el array de itemsPedido, tenemos q actualizar el objeto pedido y recalcular subtotal y total
                             //para calcular el subtotal, tenemos q recorrer el array de itemsPedido y sumar el precio de cada producto por su cantidad
-                            let _subtotal = _items.reduce((acum, item) => acum + (item.producto.Precio * (1 - item.producto.Oferta / 100) * item.cantidad), 0);
+                            let _subtotal = _items.reduce(
+                                (acc, item) => acc + (item.producto.Precio * (1 - item.producto.Oferta / 100)) * item.cantidad,
+                                0
+                            );
+
                             let _totalPagar = _subtotal + state.pedido.gastosEnvio;
+
                             return {
                                 ...state,
                                 pedido: {
@@ -103,7 +108,7 @@ const useGlobalState = create(
                                     subtotal: _subtotal,
                                     total: _totalPagar
                                 }
-                            }
+                            };
                     }
 
 

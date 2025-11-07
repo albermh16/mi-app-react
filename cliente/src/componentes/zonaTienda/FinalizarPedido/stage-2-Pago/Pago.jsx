@@ -1,10 +1,15 @@
 import './Pago.css'
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
 import useGlobalState from '../../../../globalState/stateGlobal';
 
 function Pago() {
   const [formaPago, setFormaPago]=useState({ tipo:'PayPal', detalles:{} });
   const {setPedido}=useGlobalState();
+  
+
+    useEffect(() => {
+    setPedido('setMetodoPago', formaPago);
+  }, [formaPago]);
   
   //--------- manejador de cambios en los inputs del formulario de tarjeta de credito -------------
   function handlerChangeInputs(ev){

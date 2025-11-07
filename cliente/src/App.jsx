@@ -6,7 +6,7 @@ import Registro from './componentes/zonaCliente/RegistroComponent/Registro.jsx'
 import Home from './componentes/zonaTienda/Inicio/Home.jsx'
 import ProductosCat from './componentes/zonaTienda/Productos/ProductosCat.jsx'
 import MiCuenta from './componentes/zonaCliente/CuentaPanel/MiCuenta.jsx'
-import MisDatos from './componentes/zonaCliente/CuentaPanel/1_MisDatosPersonales/MisDatos.jsx'
+import MisDatos from './componentes/zonaCliente/CuentaPanel/misDatosPersonales/MisDatos.jsx'
 import ActivarCuenta from './componentes/zonaCliente/RegistroComponent/ActivarCuenta.jsx'
 import PedidoComp from './componentes/zonaTienda/Pedido/PedidoComp.jsx'
 import FinPedido from './componentes/zonaTienda/FinalizarPedido/FinPedidoComp/FinPedido.jsx';
